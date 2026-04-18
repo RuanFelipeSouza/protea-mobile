@@ -1,1 +1,8 @@
 export { FooterTab } from './FooterTab'
+export { ActionCard } from './ActionCard'
+export { AlertItem } from './AlertItem'
+export { SegmentedControl } from './SegmentedControl'
+export { SearchInput } from './SearchInput'
+export { PatientCard } from './PatientCard'
+export { InputField } from './InputField'
+export { Button } from './Button'

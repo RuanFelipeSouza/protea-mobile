@@ -1,6 +1,5 @@
-import { View } from 'react-native'
-import { theme } from '../../src/theme'
+import { PatientsPage } from '../../src/components/pages'
 
 export default function PacientesScreen() {
-  return <View style={{ flex: 1, backgroundColor: theme.colors.neutral[10] }} />
+  return <PatientsPage />
 }

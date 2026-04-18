@@ -1,6 +1,5 @@
-import { View } from 'react-native'
-import { theme } from '../../src/theme'
+import { ProfessionalAreaPage } from '../../src/components/pages'
 
 export default function HomeScreen() {
-  return <View style={{ flex: 1, backgroundColor: theme.colors.neutral[10] }} />
+  return <ProfessionalAreaPage />
 }

@@ -1,1 +1,6 @@
 export { FooterNavBar } from './FooterNavBar'
+export { HeaderBar } from './HeaderBar'
+export { ActionGrid } from './ActionGrid'
+export { AlertsSection } from './AlertsSection'
+export { PatientsList } from './PatientsList'
+export { LoginForm } from './LoginForm'
