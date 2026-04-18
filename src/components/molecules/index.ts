@@ -1,0 +1,1 @@
+export { FooterTab } from './FooterTab'
