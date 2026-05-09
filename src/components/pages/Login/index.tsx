@@ -14,9 +14,9 @@ export function LoginPage() {
       const result = await loginRequest(usuario, senha)
       await saveToken(result.token)
       setAuth(result.token, result.user)
-      router.replace('/(tabs)')
-    } catch {
-      Alert.alert('Erro', 'Usuário ou senha inválidos. Tente novamente.')
+    } catch (e: any) {
+      console.error('Login error:', JSON.stringify(e?.response?.data ?? e?.message ?? e))
+      Alert.alert('Erro', `${e?.response?.data?.mensagem ?? e?.message ?? 'Erro desconhecido'}`)
     }
   }
 

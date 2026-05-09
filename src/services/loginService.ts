@@ -37,9 +37,9 @@ export async function loginRequest(usuario: string, senha: string): Promise<Logi
     return MOCK_RESPONSE
   }
 
-  const { data } = await api.post<LoginApiResponse>(
-    'seguranca/login',
-    { usuario, senha },
+  const { data } = await api.post<LoginApiResponse & { mensagem?: string }>(
+    '/seguranca/login',
+    { username: usuario, password: senha },
     {
       headers: {
         'Content-Type': 'application/json',
@@ -48,5 +48,10 @@ export async function loginRequest(usuario: string, senha: string): Promise<Logi
       },
     },
   )
-  return data
+
+  if (!data.token) {
+    throw new Error(data.mensagem ?? 'Usuário ou senha inválidos')
+  }
+
+  return data as LoginApiResponse
 }

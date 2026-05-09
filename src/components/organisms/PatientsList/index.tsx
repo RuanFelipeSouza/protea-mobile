@@ -1,4 +1,5 @@
 import { FlatList, View, Text, ActivityIndicator } from 'react-native'
+import { Ionicons } from '@expo/vector-icons'
 import { PatientCard } from '../../molecules'
 import { theme } from '../../../theme'
 import { styles } from './styles'
@@ -24,10 +25,16 @@ export function PatientsList({ patients, loading, onPress }: PatientsListProps) 
       data={patients}
       keyExtractor={(item) => item.id}
       contentContainerStyle={styles.list}
-      renderItem={({ item }) => <PatientCard patient={item} onPress={() => onPress(item)} />}
+      renderItem={({ item }) => (
+        <PatientCard
+          patient={item}
+          onPress={() => onPress(item)}
+        />
+      )}
       ListEmptyComponent={
         <View style={styles.emptyContainer}>
-          <Text style={styles.emptyText}>Nenhum paciente encontrado</Text>
+          <Ionicons name="person-outline" size={48} color={theme.colors.neutral[30]} />
+          <Text style={styles.emptyText}>Nenhum paciente nesta unidade</Text>
         </View>
       }
     />

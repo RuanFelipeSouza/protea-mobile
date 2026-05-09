@@ -1,6 +1,8 @@
 import { View, Text, Pressable } from 'react-native'
+import { Ionicons } from '@expo/vector-icons'
 import { SegmentedControl, SearchInput } from '../../molecules'
 import { PatientsList } from '../../organisms'
+import { theme } from '../../../theme'
 import { styles } from './styles'
 import type { Patient } from '../../../types/patient'
 
@@ -16,8 +18,9 @@ type PatientsTemplateProps = {
   onTabChange: (value: string) => void
   searchQuery: string
   onSearchChange: (value: string) => void
+  somenteAtivos: boolean
+  onToggleSomenteAtivos: () => void
   onPatientPress: (patient: Patient) => void
-  onNovoPaciente: () => void
 }
 
 export function PatientsTemplate({
@@ -27,8 +30,9 @@ export function PatientsTemplate({
   onTabChange,
   searchQuery,
   onSearchChange,
+  somenteAtivos,
+  onToggleSomenteAtivos,
   onPatientPress,
-  onNovoPaciente,
 }: PatientsTemplateProps) {
   return (
     <View style={styles.container}>
@@ -39,11 +43,24 @@ export function PatientsTemplate({
           onChange={onSearchChange}
           placeholder="Buscar paciente..."
         />
-        <PatientsList patients={patients} loading={loading} onPress={onPatientPress} />
+
+        <Pressable style={styles.filterChip} onPress={onToggleSomenteAtivos}>
+          <Ionicons
+            name={somenteAtivos ? 'checkmark-circle' : 'ellipse-outline'}
+            size={16}
+            color={somenteAtivos ? theme.colors.success[60] : theme.colors.neutral[50]}
+          />
+          <Text style={[styles.filterChipText, somenteAtivos && styles.filterChipTextActive]}>
+            {somenteAtivos ? 'Somente ativos' : 'Todos os pacientes'}
+          </Text>
+        </Pressable>
+
+        <PatientsList
+          patients={patients}
+          loading={loading}
+          onPress={onPatientPress}
+        />
       </View>
-      <Pressable style={styles.novoPacienteButton} onPress={onNovoPaciente}>
-        <Text style={styles.novoPacienteLabel}>+ Novo Paciente</Text>
-      </Pressable>
     </View>
   )
 }

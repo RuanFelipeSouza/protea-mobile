@@ -9,7 +9,7 @@ export const styles = StyleSheet.create({
     gap: 6,
   },
   label: {
-    color: theme.colors.neutral[0],
+    color: theme.colors.neutral[70],
     fontSize: 14,
     fontWeight: '500',
   },
@@ -18,7 +18,7 @@ export const styles = StyleSheet.create({
     marginTop: 4,
   },
   forgotPasswordText: {
-    color: theme.colors.neutral[0],
+    color: theme.colors.primary[70],
     fontSize: 13,
   },
   buttons: {

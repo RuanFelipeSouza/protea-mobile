@@ -22,7 +22,7 @@ export const styles = StyleSheet.create({
     color: theme.colors.neutral[0],
   },
   ghostLabel: {
-    color: theme.colors.neutral[0],
+    color: theme.colors.primary[70],
     textDecorationLine: 'underline',
     fontWeight: '400',
   },

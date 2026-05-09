@@ -20,10 +20,10 @@ export function LoginTemplate({ onLogin, onForgotPassword, onParentArea }: Login
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <View style={styles.leafTopRight} pointerEvents="none">
-        <Icon name="leaf" size={220} color={theme.colors.primary[80]} />
+        <Icon name="leaf" size={220} color={theme.colors.primary[30]} />
       </View>
       <View style={styles.leafBottomLeft} pointerEvents="none">
-        <Icon name="leaf" size={200} color={theme.colors.primary[80]} />
+        <Icon name="leaf" size={200} color={theme.colors.primary[30]} />
       </View>
 
       <ScrollView
@@ -35,7 +35,7 @@ export function LoginTemplate({ onLogin, onForgotPassword, onParentArea }: Login
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.logoSection}>
-          <Icon name="flower-outline" size={64} color={theme.colors.neutral[0]} />
+          <Icon name="flower-outline" size={64} color={theme.colors.primary[70]} />
           <Text style={styles.logoText}>PROTEA</Text>
         </View>
 

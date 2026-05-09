@@ -1,17 +1,12 @@
-import { Tabs } from 'expo-router'
+import { Stack } from 'expo-router'
+import { View } from 'react-native'
 import { FooterNavBar } from '../../src/components/organisms'
 
 export default function TabsLayout() {
   return (
-    <Tabs
-      tabBar={(props) => <FooterNavBar {...props} />}
-      screenOptions={{ headerShown: false }}
-    >
-      <Tabs.Screen name="index" />
-      <Tabs.Screen name="pacientes" />
-      <Tabs.Screen name="localizacao" />
-      <Tabs.Screen name="mensagens" />
-      <Tabs.Screen name="perfil" />
-    </Tabs>
+    <View style={{ flex: 1 }}>
+      <Stack screenOptions={{ headerShown: false }} />
+      <FooterNavBar />
+    </View>
   )
 }

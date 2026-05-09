@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import type { UserResponse } from '../services/loginService'
+import { useUnidadeStore } from './unidadeStore'
 
 interface AuthState {
   token: string | null
@@ -12,5 +13,8 @@ export const useAuthStore = create<AuthState>((set) => ({
   token: null,
   usuario: null,
   setAuth: (token, usuario) => set({ token, usuario }),
-  logout: () => set({ token: null, usuario: null }),
+  logout: () => {
+    useUnidadeStore.getState().limpar()
+    set({ token: null, usuario: null })
+  },
 }))

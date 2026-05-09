@@ -4,7 +4,7 @@ import { theme } from '../../../theme'
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme.colors.primary[90],
+    backgroundColor: theme.colors.neutral[0],
   },
   scroll: {
     flexGrow: 1,
@@ -31,7 +31,7 @@ export const styles = StyleSheet.create({
     gap: 8,
   },
   logoText: {
-    color: theme.colors.neutral[0],
+    color: theme.colors.primary[80],
     fontSize: 28,
     fontWeight: '700',
     letterSpacing: 4,

@@ -1,3 +1,7 @@
 export { ProfessionalAreaPage } from './ProfessionalArea'
 export { PatientsPage } from './Patients'
 export { LoginPage } from './Login'
+export { ProntuarioPage } from './Prontuario'
+export { EvolucoesPendentesPage } from './Evolucoes'
+export { RelatoriosPage } from './Relatorios'
+export { AgendaPage } from './Agenda'

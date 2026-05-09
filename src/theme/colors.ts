@@ -43,9 +43,10 @@ export const colors = {
   error: {
     40: '#EF5350',
     60: '#E53935',
+    100: '#D32F2F',
   },
   success: {
     40: '#66BB6A',
     60: '#43A047',
   },
-} as const
+} as const;
