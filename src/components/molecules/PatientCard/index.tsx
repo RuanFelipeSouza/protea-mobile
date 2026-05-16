@@ -2,7 +2,6 @@ import { View, Text, Pressable } from 'react-native'
 import { Icon } from '../../atoms'
 import { theme } from '../../../theme'
 import { styles } from './styles'
-import { calcularIdade } from '../../../types/patient'
 import type { Patient } from '../../../types/patient'
 
 type PatientCardProps = {
@@ -11,7 +10,6 @@ type PatientCardProps = {
 }
 
 export function PatientCard({ patient, onPress }: PatientCardProps) {
-  const idade = calcularIdade(patient.datanasc)
   const isAtivo = patient.is_active
 
   return (
@@ -34,15 +32,17 @@ export function PatientCard({ patient, onPress }: PatientCardProps) {
             </View>
           )}
         </View>
-        <Text style={styles.meta}>
-          {idade != null ? `${idade} anos` : '—'}
-          {patient.sexo ? ` · ${patient.sexo}` : ''}
+        <Text style={styles.responsavel} numberOfLines={1}>
+          {patient.nomemae ? `Responsável: ${patient.nomemae}` : '—'}
+        </Text>
+        <Text style={styles.meta} numberOfLines={1}>
+          {patient.cpf ? `CPF: ${patient.cpf}` : '—'}
         </Text>
       </View>
 
       <View style={styles.actions}>
         <Pressable style={styles.actionBtn} onPress={onPress} hitSlop={6}>
-          <Icon name="id-card-outline" size={20} color={theme.colors.primary[70]} />
+          <Icon name="id-card-outline" size={40} color={theme.colors.primary[70]} />
         </Pressable>
       </View>
     </Pressable>

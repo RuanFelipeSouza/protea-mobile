@@ -57,7 +57,14 @@ export const styles = StyleSheet.create({
   },
   meta: {
     fontSize: 13,
-    color: theme.colors.neutral[50],
+    color: theme.colors.neutral[60],
+    marginTop: 2,
+    fontVariant: ['tabular-nums'],
+  },
+  responsavel: {
+    fontSize: 13,
+    color: theme.colors.neutral[80],
+    fontWeight: '500',
     marginTop: 2,
   },
 
@@ -84,8 +91,8 @@ export const styles = StyleSheet.create({
     flexShrink: 0,
   },
   actionBtn: {
-    width: 32,
-    height: 32,
+    width: 48,
+    height: 48,
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 8,

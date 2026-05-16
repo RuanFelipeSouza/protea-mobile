@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import type { ComponentProps } from 'react';
 import { ScrollView } from 'react-native';
-import { ActionGrid } from '../../organisms';
+import { ActionGrid, TodayAgendaSection } from '../../organisms';
 import { styles } from './styles';
 
 type ActionItem = {
@@ -18,6 +18,7 @@ export function ProfessionalAreaTemplate({ actions }: ProfessionalAreaTemplatePr
   return (
     <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
       <ActionGrid items={actions} />
+      <TodayAgendaSection />
       {/* <AlertsSection alerts={alerts} onVerTodos={onVerTodos} /> */}
     </ScrollView>
   );
