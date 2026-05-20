@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons'
 import { HeaderBar, UnidadeRequired } from '../../organisms'
 import { HtmlViewerModal } from '../../molecules'
 import { useEvolucoesPendentes } from '../../../hooks/useEvolucoesPendentes'
+import { useEvolucaoDetalhes } from '../../../hooks/useEvolucaoDetalhes'
 import { theme } from '../../../theme'
 import type { EvolucaoPendente, EvolucaoStatusType } from '../../../types/evolucaoPendente'
 
@@ -25,6 +26,9 @@ export function EvolucoesPendentesPage() {
   const { evolucoes, loading, erro, statusDisponiveis, statusSelecionado, setStatusFiltro } =
     useEvolucoesPendentes()
   const [selecionada, setSelecionada] = useState<EvolucaoPendente | null>(null)
+  const { evolucao: detalhes, loading: carregandoDetalhes } = useEvolucaoDetalhes(
+    selecionada?.id ?? 0,
+  )
 
   function formatId(id: number): string {
     return `#${id.toString().padStart(4, '0')}`
@@ -163,8 +167,14 @@ export function EvolucoesPendentesPage() {
           </>
         )}
 
+        {carregandoDetalhes && (
+          <View style={styles.modalLoading}>
+            <ActivityIndicator size="large" color={theme.colors.primary[70]} />
+          </View>
+        )}
+
         <HtmlViewerModal
-          visible={!!selecionada}
+          visible={!!selecionada && !carregandoDetalhes}
           onClose={() => setSelecionada(null)}
           title={selecionada ? `Evolução ${formatId(selecionada.id)}` : ''}
           subtitle={
@@ -172,7 +182,7 @@ export function EvolucoesPendentesPage() {
               ? `${selecionada.dataform}${selecionada.hora ? ` · ${selecionada.hora}` : ''}`
               : undefined
           }
-          html={selecionada?.evolucao ?? null}
+          html={detalhes?.evolucao ?? null}
         />
       </UnidadeRequired>
     </View>
@@ -285,5 +295,15 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: theme.colors.neutral[60],
     textAlign: 'center',
+  },
+  modalLoading: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
   },
 })

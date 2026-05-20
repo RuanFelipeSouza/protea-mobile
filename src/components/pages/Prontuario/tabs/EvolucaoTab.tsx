@@ -1,7 +1,6 @@
-import { useState } from 'react'
 import { View, Text, FlatList, Pressable, StyleSheet, ActivityIndicator } from 'react-native'
+import { useRouter } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
-import { HtmlViewerModal } from '../../../molecules'
 import { useEvolucoes } from '../../../../hooks/useEvolucoes'
 import { theme } from '../../../../theme'
 import type { EvolucaoRealizada } from '../../../../types/evolucao'
@@ -15,8 +14,8 @@ function formatId(id: number): string {
 }
 
 export function EvolucaoTab({ pacienteId }: EvolucaoTabProps) {
+  const router = useRouter()
   const { evolucoes, loading, erro } = useEvolucoes(pacienteId)
-  const [selecionada, setSelecionada] = useState<EvolucaoRealizada | null>(null)
 
   if (loading) {
     return (
@@ -51,7 +50,18 @@ export function EvolucaoTab({ pacienteId }: EvolucaoTabProps) {
         keyExtractor={(item) => String(item.id)}
         contentContainerStyle={styles.list}
         renderItem={({ item }) => (
-          <Pressable style={styles.card} onPress={() => setSelecionada(item)}>
+          <Pressable
+            style={styles.card}
+            onPress={() => {
+              router.push({
+                pathname: '/prontuario/[id]/evolucao/[evolucao_id]',
+                params: {
+                  id: pacienteId,
+                  evolucao_id: item.id,
+                },
+              })
+            }}
+          >
             <View style={styles.cardHeader}>
               <Text style={styles.cardId}>{formatId(item.id)}</Text>
               <Text style={styles.cardData}>{item.data} · {item.hora}</Text>
@@ -78,14 +88,6 @@ export function EvolucaoTab({ pacienteId }: EvolucaoTabProps) {
             </View>
           </Pressable>
         )}
-      />
-
-      <HtmlViewerModal
-        visible={!!selecionada}
-        onClose={() => setSelecionada(null)}
-        title={selecionada ? `Evolução ${formatId(selecionada.id)}` : ''}
-        subtitle={selecionada ? `${selecionada.data} · ${selecionada.profissional}` : undefined}
-        html={selecionada?.evolucao ?? null}
       />
     </>
   )

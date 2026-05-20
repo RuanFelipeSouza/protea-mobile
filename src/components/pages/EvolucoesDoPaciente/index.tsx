@@ -1,17 +1,15 @@
 import { View, Text, FlatList, ActivityIndicator, StyleSheet, ScrollView, Pressable } from 'react-native'
 import { useRouter } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
-import { useState } from 'react'
 import { HeaderBar } from '../../organisms'
-import { HtmlViewerModal } from '../../molecules'
 import { useEvolucoesDoPaciente } from '../../../hooks/useEvolucoesDoPaciente'
-import { useEvolucaoDetalhes } from '../../../hooks/useEvolucaoDetalhes'
 import { theme } from '../../../theme'
-import type { EvolucaoStatus, EvolucaoMobile } from '../../../types/mobile'
+import type { EvolucaoStatus } from '../../../types/mobile'
 
 type Props = {
   unidadeId: number
   pacienteId: number
+  pacienteNome?: string
   nomePaciente?: string
 }
 
@@ -27,17 +25,19 @@ const STATUS_COLORS: Record<EvolucaoStatus, string> = {
   cancelada: theme.colors.error?.[40] ?? '#F44336',
 }
 
-export function EvolucoesDoPacientePage({ unidadeId, pacienteId, nomePaciente }: Props) {
+export function EvolucoesDoPacientePage({ unidadeId, pacienteId, pacienteNome, nomePaciente }: Props) {
   const router = useRouter()
-  const [selecionada, setSelecionada] = useState<EvolucaoMobile | null>(null)
   const { evolucoes, loading, erro, statusDisponiveis, statusSelecionado, setStatusFiltro } =
     useEvolucoesDoPaciente(unidadeId, pacienteId)
-  const { evolucao: detalhes, loading: carregandoDetalhes } = useEvolucaoDetalhes(
-    selecionada?.id ?? 0,
-  )
 
   const handleCardPress = (evolucao: EvolucaoMobile) => {
-    setSelecionada(evolucao)
+    router.push({
+      pathname: '/prontuario/[id]/evolucao/[evolucao_id]',
+      params: {
+        id: pacienteId,
+        evolucao_id: evolucao.id,
+      },
+    })
   }
 
   return (
@@ -173,30 +173,6 @@ export function EvolucoesDoPacientePage({ unidadeId, pacienteId, nomePaciente }:
         </>
       )}
 
-      {carregandoDetalhes && (
-        <View style={styles.modalLoading}>
-          <ActivityIndicator size="large" color={theme.colors.primary[70]} />
-        </View>
-      )}
-
-      {selecionada && (
-        <>
-          {console.log('[DEBUG] selecionada:', selecionada)}
-          {console.log('[DEBUG] detalhes:', detalhes)}
-        </>
-      )}
-
-      <HtmlViewerModal
-        visible={!!selecionada && !carregandoDetalhes}
-        onClose={() => setSelecionada(null)}
-        title={selecionada ? `Evolução #${selecionada.id.toString().padStart(4, '0')}` : ''}
-        subtitle={
-          selecionada
-            ? `${selecionada.data}${selecionada.hora ? ` · ${selecionada.hora}` : ''}`
-            : undefined
-        }
-        html={detalhes?.evolucao ?? null}
-      />
     </View>
   )
 }
@@ -212,16 +188,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 12,
     paddingTop: 60,
-  },
-  modalLoading: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.3)',
   },
   filterContainer: {
     paddingHorizontal: 16,

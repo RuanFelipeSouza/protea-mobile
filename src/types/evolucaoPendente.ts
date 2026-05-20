@@ -27,3 +27,13 @@ export type EvolucaoPendente = {
   pacienteid: number | null
   status: EvolucaoStatusType
 }
+
+export type Pendencia = {
+  id: number
+  tipo: string | null
+  data: string
+  hora: string | null
+  paciente_nome: string
+  paciente_id: number
+  pendente: boolean
+}

@@ -16,28 +16,34 @@ export function useEvolucaoDetalhes(evolucaoId: number) {
   })
 
   useEffect(() => {
+    console.log('[useEvolucaoDetalhes] useEffect triggered, evolucaoId:', evolucaoId)
+
     if (!evolucaoId) {
+      console.log('[useEvolucaoDetalhes] ID inválido, retornando')
       setState({ evolucao: null, loading: false, erro: null })
       return
     }
 
     const controller = new AbortController()
-    console.log('[useEvolucaoDetalhes] iniciando com ID:', evolucaoId)
+    console.log('[useEvolucaoDetalhes] iniciando requisição com ID:', evolucaoId)
     setState({ evolucao: null, loading: true, erro: null })
 
     evolucaoService
       .getEvolucaoDetalhes(evolucaoId)
       .then((evolucao) => {
-        console.log('[useEvolucaoDetalhes] sucesso:', evolucao)
+        console.log('[useEvolucaoDetalhes] ✅ sucesso:', evolucao)
         setState({ evolucao, loading: false, erro: null })
       })
       .catch((err) => {
-        if (err?.code === 'ERR_CANCELED') return
-        console.error('[useEvolucaoDetalhes] erro:', err)
+        if (err?.code === 'ERR_CANCELED') {
+          console.log('[useEvolucaoDetalhes] requisição cancelada')
+          return
+        }
+        console.error('[useEvolucaoDetalhes] ❌ erro:', err?.message || err)
         setState({
           evolucao: null,
           loading: false,
-          erro: 'Erro ao carregar evolução',
+          erro: `Erro ao carregar: ${err?.message || 'desconhecido'}`,
         })
       })
 

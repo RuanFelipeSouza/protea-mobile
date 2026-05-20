@@ -2,17 +2,22 @@ import { proteaApi } from './apiClient'
 import type { EvolucaoRealizada } from '../types/evolucao'
 import type { Acompanhamento } from '../types/acompanhamento'
 import type { DocumentoEvolucao } from '../types/documento'
-import type { EvolucaoPendente, EvolucaoAPI, EvolucaoStatusType } from '../types/evolucaoPendente'
+import type { EvolucaoPendente, EvolucaoAPI, EvolucaoStatusType, Pendencia } from '../types/evolucaoPendente'
 import type { EvolucaoDetalhes } from '../types/mobile'
 
 export const evolucaoService = {
   async getEvolucaoDetalhes(evolucaoId: number): Promise<EvolucaoDetalhes> {
-    console.log('[evolucaoService] getEvolucaoDetalhes chamado com ID:', evolucaoId)
-    const { data } = await proteaApi.get<EvolucaoDetalhes>(
-      `mobile/evolucoes/${evolucaoId}`
-    )
-    console.log('[evolucaoService] getEvolucaoDetalhes retornou:', data)
-    return data
+    console.log('[evolucaoService] 🔄 getEvolucaoDetalhes chamado com ID:', evolucaoId)
+    try {
+      const endpoint = `mobile/evolucoes/${evolucaoId}`
+      console.log('[evolucaoService] 📡 Requisição para:', endpoint)
+      const { data } = await proteaApi.get<EvolucaoDetalhes>(endpoint)
+      console.log('[evolucaoService] ✅ Resposta recebida:', data)
+      return data
+    } catch (error) {
+      console.error('[evolucaoService] ❌ Erro na requisição:', error)
+      throw error
+    }
   },
 
   async getEvolucoes(pacienteId: string | number): Promise<EvolucaoRealizada[]> {
@@ -56,5 +61,16 @@ export const evolucaoService = {
       pacienteid: item.paciente_id,
       status: item.pendente ? 'pendente' : ('realizada' as EvolucaoStatusType),
     }))
+  },
+
+  async getPendencias(unidadeId: number, page = 1): Promise<Pendencia[]> {
+    const { data } = await proteaApi.get<{
+      count: number
+      next?: string | null
+      previous?: string | null
+      results: Pendencia[]
+    }>(`mobile/unidade/${unidadeId}/pendencias?page=${page}`)
+
+    return data.results
   },
 }
