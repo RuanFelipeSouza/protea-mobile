@@ -9,7 +9,6 @@ import type { Patient } from '../../../types/patient'
 
 export function PatientsPage() {
   const router = useRouter()
-  const [activeTab, setActiveTab] = useState('pacientes')
   const [searchQuery, setSearchQuery] = useState('')
   const [somenteAtivos, setSomenteAtivos] = useState(true)
 
@@ -26,8 +25,6 @@ export function PatientsPage() {
         <PatientsTemplate
           patients={pacientes}
           loading={loading}
-          activeTab={activeTab}
-          onTabChange={setActiveTab}
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
           somenteAtivos={somenteAtivos}

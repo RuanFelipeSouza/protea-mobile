@@ -1,4 +1,5 @@
 import { agendaApi as api } from './apiClient'
+import { theme } from '../theme'
 import type { AgendaItem } from '../types/agenda'
 
 type AgendaFiltros = {
@@ -9,11 +10,25 @@ type AgendaFiltros = {
   status?: number
 }
 
+function getColorByStatus(status: string): string {
+  const s = status.toLowerCase()
+  if (s.includes('cancelad')) return theme.colors.error[40]
+  if (s.includes('atendido')) return theme.colors.success[60]
+  if (s.includes('falta')) return theme.colors.warning[60]
+  return theme.colors.primary[70]
+}
+
 export const agendaService = {
   async getAgenda(filtros: AgendaFiltros): Promise<AgendaItem[]> {
     const { data } = await api.get<AgendaItem[]>('codedatas/listagendasFiltrado', {
       params: filtros,
     })
-    return [...data].sort((a, b) => a.hora.localeCompare(b.hora))
+
+    return [...data]
+      .map((item) => ({
+        ...item,
+        cor: getColorByStatus(item.status),
+      }))
+      .sort((a, b) => a.hora.localeCompare(b.hora))
   },
 }

@@ -1,21 +1,14 @@
 import { View, Text, Pressable } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
-import { SegmentedControl, SearchInput } from '../../molecules'
+import { SearchInput } from '../../molecules'
 import { PatientsList } from '../../organisms'
 import { theme } from '../../../theme'
 import { styles } from './styles'
 import type { Patient } from '../../../types/patient'
 
-const TABS = [
-  { label: 'Pacientes', value: 'pacientes' },
-  { label: 'Evoluções', value: 'evolucoes' },
-]
-
 type PatientsTemplateProps = {
   patients: Patient[]
   loading: boolean
-  activeTab: string
-  onTabChange: (value: string) => void
   searchQuery: string
   onSearchChange: (value: string) => void
   somenteAtivos: boolean
@@ -26,8 +19,6 @@ type PatientsTemplateProps = {
 export function PatientsTemplate({
   patients,
   loading,
-  activeTab,
-  onTabChange,
   searchQuery,
   onSearchChange,
   somenteAtivos,
@@ -37,7 +28,6 @@ export function PatientsTemplate({
   return (
     <View style={styles.container}>
       <View style={styles.content}>
-        <SegmentedControl tabs={TABS} active={activeTab} onChange={onTabChange} />
         <SearchInput
           value={searchQuery}
           onChange={onSearchChange}

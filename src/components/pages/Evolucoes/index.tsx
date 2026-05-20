@@ -1,81 +1,179 @@
-import { View, Text, FlatList, Pressable, ActivityIndicator, StyleSheet } from 'react-native'
+import { useState } from 'react'
+import { View, Text, FlatList, Pressable, ActivityIndicator, StyleSheet, ScrollView } from 'react-native'
 import { useRouter } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
 import { HeaderBar, UnidadeRequired } from '../../organisms'
+import { HtmlViewerModal } from '../../molecules'
 import { useEvolucoesPendentes } from '../../../hooks/useEvolucoesPendentes'
 import { theme } from '../../../theme'
-import type { EvolucaoPendente } from '../../../types/evolucaoPendente'
+import type { EvolucaoPendente, EvolucaoStatusType } from '../../../types/evolucaoPendente'
+
+const STATUS_LABELS: Record<EvolucaoStatusType, string> = {
+  realizada: 'Realizada',
+  pendente: 'Pendente',
+  cancelada: 'Cancelada',
+}
+
+const STATUS_COLORS: Record<EvolucaoStatusType, string> = {
+  realizada: theme.colors.success?.[60] ?? '#4CAF50',
+  pendente: theme.colors.warning?.[60] ?? '#FF9800',
+  cancelada: theme.colors.error?.[40] ?? '#F44336',
+}
 
 export function EvolucoesPendentesPage() {
   const router = useRouter()
-  const { evolucoes, loading, erro } = useEvolucoesPendentes()
+  const { evolucoes, loading, erro, statusDisponiveis, statusSelecionado, setStatusFiltro } =
+    useEvolucoesPendentes()
+  const [selecionada, setSelecionada] = useState<EvolucaoPendente | null>(null)
+
+  function formatId(id: number): string {
+    return `#${id.toString().padStart(4, '0')}`
+  }
 
   function handleCardPress(evolucao: EvolucaoPendente) {
-    if (!evolucao.pacienteid) return
-    router.push(
-      `/prontuario/${evolucao.pacienteid}?nome=${encodeURIComponent(evolucao.pacientenome ?? 'Paciente')}` as any,
-    )
+    setSelecionada(evolucao)
   }
 
   return (
     <View style={styles.container}>
-      <HeaderBar title="Evoluções Pendentes" showBack onBack={() => router.back()} showProfile={false} />
+      <HeaderBar title="Evoluções" showBack onBack={() => router.back()} showProfile={false} />
 
-      <UnidadeRequired contextMessage="Selecione a unidade na home para visualizar as evoluções pendentes.">
-      {loading && (
-        <View style={styles.center}>
-          <ActivityIndicator size="large" color={theme.colors.primary[70]} />
-        </View>
-      )}
+      <UnidadeRequired contextMessage="Selecione a unidade na home para visualizar as evoluções.">
+        {loading && (
+          <View style={styles.center}>
+            <ActivityIndicator size="large" color={theme.colors.primary[70]} />
+          </View>
+        )}
 
-      {erro && (
-        <View style={styles.center}>
-          <Ionicons name="alert-circle-outline" size={40} color={theme.colors.error[40]} />
-          <Text style={styles.erroText}>{erro}</Text>
-        </View>
-      )}
+        {erro && (
+          <View style={styles.center}>
+            <Ionicons name="alert-circle-outline" size={40} color={theme.colors.error[40]} />
+            <Text style={styles.erroText}>{erro}</Text>
+          </View>
+        )}
 
-      {!loading && !erro && (
-        <FlatList
-          data={evolucoes}
-          keyExtractor={(item) => String(item.id)}
-          contentContainerStyle={styles.list}
-          ListHeaderComponent={
-            evolucoes.length > 0 ? (
-              <Text style={styles.count}>
-                {evolucoes.length} {evolucoes.length === 1 ? 'evolução pendente' : 'evoluções pendentes'}
-              </Text>
-            ) : null
-          }
-          ListEmptyComponent={
-            <View style={styles.center}>
-              <Ionicons name="checkmark-circle-outline" size={48} color={theme.colors.primary[60]} />
-              <Text style={styles.emptyText}>Nenhuma evolução pendente</Text>
-            </View>
-          }
-          renderItem={({ item }) => (
-            <Pressable style={styles.card} onPress={() => handleCardPress(item)}>
-              <View style={styles.cardLeft}>
-                <Text style={styles.pacienteNome}>{item.pacientenome ?? '—'}</Text>
-                <View style={styles.cardRow}>
-                  <Text style={styles.tipo}>{item.tipoevolucao?.tipo ?? 'Sem tipo'}</Text>
-                  {item.dataform && (
-                    <Text style={styles.data}>
-                      {'  ·  '}
-                      {item.dataform}
-                      {item.hora ? ` ${item.hora}` : ''}
+        {!loading && !erro && (
+          <>
+            {statusDisponiveis.length > 0 && (
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.filterContainer}
+              >
+                <Pressable
+                  style={[
+                    styles.filterChip,
+                    statusSelecionado === null && styles.filterChipActive,
+                  ]}
+                  onPress={() => setStatusFiltro(null)}
+                >
+                  <Ionicons
+                    name={statusSelecionado === null ? 'checkmark-circle' : 'ellipse-outline'}
+                    size={16}
+                    color={statusSelecionado === null ? theme.colors.primary[70] : theme.colors.neutral[50]}
+                  />
+                  <Text
+                    style={[
+                      styles.filterChipText,
+                      statusSelecionado === null && styles.filterChipTextActive,
+                    ]}
+                  >
+                    Todas
+                  </Text>
+                </Pressable>
+
+                {statusDisponiveis.map((status) => (
+                  <Pressable
+                    key={status}
+                    style={[
+                      styles.filterChip,
+                      statusSelecionado === status && styles.filterChipActive,
+                    ]}
+                    onPress={() => setStatusFiltro(status)}
+                  >
+                    <Ionicons
+                      name={statusSelecionado === status ? 'checkmark-circle' : 'ellipse-outline'}
+                      size={16}
+                      color={statusSelecionado === status ? STATUS_COLORS[status] : theme.colors.neutral[50]}
+                    />
+                    <Text
+                      style={[
+                        styles.filterChipText,
+                        statusSelecionado === status && styles.filterChipTextActive,
+                      ]}
+                    >
+                      {STATUS_LABELS[status]}
                     </Text>
-                  )}
+                  </Pressable>
+                ))}
+              </ScrollView>
+            )}
+
+            <FlatList
+              data={evolucoes}
+              keyExtractor={(item) => String(item.id)}
+              contentContainerStyle={styles.list}
+              ListHeaderComponent={
+                evolucoes.length > 0 ? (
+                  <Text style={styles.count}>
+                    {evolucoes.length} {evolucoes.length === 1 ? 'evolução' : 'evoluções'}
+                  </Text>
+                ) : null
+              }
+              ListEmptyComponent={
+                <View style={styles.center}>
+                  <Ionicons
+                    name="document-text-outline"
+                    size={48}
+                    color={theme.colors.neutral[40]}
+                  />
+                  <Text style={styles.emptyText}>Nenhuma evolução encontrada</Text>
                 </View>
-                {item.profissionalnome && (
-                  <Text style={styles.profissional}>{item.profissionalnome}</Text>
-                )}
-              </View>
-              <Ionicons name="chevron-forward" size={20} color={theme.colors.neutral[40]} />
-            </Pressable>
-          )}
+              }
+              renderItem={({ item }) => (
+                <Pressable style={styles.card} onPress={() => handleCardPress(item)}>
+                  <View style={styles.cardLeft}>
+                    <Text style={styles.pacienteNome}>{item.pacientenome ?? '—'}</Text>
+                    <View style={styles.cardRow}>
+                      <Text style={styles.tipo}>{item.tipoevolucao?.tipo ?? 'Sem tipo'}</Text>
+                      {item.dataform && (
+                        <Text style={styles.data}>
+                          {'  ·  '}
+                          {item.dataform}
+                          {item.hora ? ` ${item.hora}` : ''}
+                        </Text>
+                      )}
+                    </View>
+                    {item.profissionalnome && (
+                      <Text style={styles.profissional}>{item.profissionalnome}</Text>
+                    )}
+                  </View>
+                  <View
+                    style={[
+                      styles.statusBadge,
+                      { backgroundColor: STATUS_COLORS[item.status] },
+                    ]}
+                  >
+                    <Text style={styles.statusBadgeText}>{STATUS_LABELS[item.status]}</Text>
+                  </View>
+                  <Ionicons name="chevron-forward" size={20} color={theme.colors.neutral[40]} />
+                </Pressable>
+              )}
+            />
+          </>
+        )}
+
+        <HtmlViewerModal
+          visible={!!selecionada}
+          onClose={() => setSelecionada(null)}
+          title={selecionada ? `Evolução ${formatId(selecionada.id)}` : ''}
+          subtitle={
+            selecionada
+              ? `${selecionada.dataform}${selecionada.hora ? ` · ${selecionada.hora}` : ''}`
+              : undefined
+          }
+          html={selecionada?.evolucao ?? null}
         />
-      )}
       </UnidadeRequired>
     </View>
   )
@@ -92,6 +190,33 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 12,
     paddingTop: 60,
+  },
+  filterContainer: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    gap: 8,
+  },
+  filterChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 20,
+    backgroundColor: theme.colors.neutral[0],
+    borderWidth: 1,
+    borderColor: theme.colors.neutral[20],
+  },
+  filterChipActive: {
+    borderColor: theme.colors.primary[70],
+  },
+  filterChipText: {
+    fontSize: 13,
+    fontWeight: '500',
+    color: theme.colors.neutral[50],
+  },
+  filterChipTextActive: {
+    color: theme.colors.primary[70],
   },
   list: {
     padding: 16,
@@ -140,6 +265,16 @@ const styles = StyleSheet.create({
   profissional: {
     fontSize: 12,
     color: theme.colors.neutral[50],
+  },
+  statusBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+  },
+  statusBadgeText: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: theme.colors.neutral[0],
   },
   erroText: {
     fontSize: 14,

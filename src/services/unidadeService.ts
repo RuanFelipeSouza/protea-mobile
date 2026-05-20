@@ -1,4 +1,4 @@
-import { agendaApi } from './apiClient'
+import { api, HOST_PUBLICO } from './apiClient'
 import type { Unidade } from '../types/unidade'
 
 const USE_MOCK = process.env.EXPO_PUBLIC_USE_MOCK === 'true'
@@ -23,8 +23,9 @@ export const unidadeService = {
       return MOCK_UNIDADES
     }
 
-    const { data } = await agendaApi.get<Unidade[]>('unidade/unidadesPrest', {
+    const { data } = await api.get<Unidade[]>('unidade/unidadesPrest', {
       params: { user: userId },
+      headers: HOST_PUBLICO,
       signal,
     })
     return data

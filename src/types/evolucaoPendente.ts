@@ -1,6 +1,18 @@
+export type EvolucaoStatusType = 'realizada' | 'pendente' | 'cancelada'
+
 export type TipoEvolucao = {
   id: number
   tipo: string
+}
+
+export type EvolucaoAPI = {
+  id: number
+  data: string
+  hora: string | null
+  tipo: string
+  pendente: boolean
+  paciente_id: number
+  paciente_nome: string
 }
 
 export type EvolucaoPendente = {
@@ -13,4 +25,5 @@ export type EvolucaoPendente = {
   hora: string | null
   pacientenome: string | null
   pacienteid: number | null
+  status: EvolucaoStatusType
 }

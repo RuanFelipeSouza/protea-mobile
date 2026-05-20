@@ -10,7 +10,7 @@ export function ProfessionalAreaPage() {
   const ACTIONS = [
     { icon: 'people' as const, label: 'Pacientes', onPress: () => router.push('/(tabs)/pacientes') },
     { icon: 'create' as const, label: 'Evoluções', onPress: () => router.push('/(tabs)/evolucoes') },
-    { icon: 'clipboard' as const, label: 'Relatórios', onPress: () => router.push('/(tabs)/relatorios') },
+    { icon: 'alert-circle' as const, label: 'Pendências', onPress: () => router.push('/(tabs)/pendencias') },
     { icon: 'calendar' as const, label: 'Agenda', onPress: () => router.push('/(tabs)/agenda') },
   ]
 

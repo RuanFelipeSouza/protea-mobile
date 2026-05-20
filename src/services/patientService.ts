@@ -1,16 +1,16 @@
-import { api } from './apiClient'
-import type { Patient } from '../types/patient'
+import type { Patient } from '../types/patient';
+import { api } from './apiClient';
 
 type PacienteResponse = {
-  id: number
-  nome: string
-  datanasc: string
-  imagem_url?: string
-  is_active?: boolean
-  cpf?: string
-  nomemae?: string
-  sexo?: { sexo: string }
-}
+  id: number;
+  nome: string;
+  datanasc: string;
+  imagem_url?: string;
+  is_active?: boolean;
+  cpf?: string;
+  nomemae?: string;
+  sexo?: { sexo: string };
+};
 
 function toPatient(p: PacienteResponse): Patient {
   return {
@@ -22,7 +22,7 @@ function toPatient(p: PacienteResponse): Patient {
     cpf: p.cpf,
     nomemae: p.nomemae,
     sexo: p.sexo?.sexo,
-  }
+  };
 }
 
 export const patientService = {
@@ -32,8 +32,8 @@ export const patientService = {
       `paciente/allPaciente?texto=${encodeURIComponent(texto)}`,
       {},
       { signal },
-    )
-    return data.map(toPatient)
+    );
+    return data.map(toPatient);
   },
 
   /**
@@ -47,14 +47,13 @@ export const patientService = {
     is_active?: boolean,
     signal?: AbortSignal,
   ): Promise<Patient[]> {
-    const { data } = await api.get<PacienteResponse[]>(`paciente/mobile/pacientes`, {
+    const { data } = await api.get<PacienteResponse[]>(`mobile/unidade/${unidadeId}/paciente`, {
       params: {
-        unidade_id: unidadeId,
         ...(is_active !== undefined && { is_active }),
       },
       signal,
-    })
-    return data.map(toPatient)
+    });
+    return data.map(toPatient);
   },
 
   /**
@@ -62,7 +61,7 @@ export const patientService = {
    * Endpoint: POST paciente/togglePacienteStatus
    */
   async toggleStatus(id: number, is_active: boolean): Promise<void> {
-    await api.post('paciente/togglePacienteStatus', { id, is_active })
+    await api.post('paciente/togglePacienteStatus', { id, is_active });
   },
 
   /**
@@ -70,6 +69,6 @@ export const patientService = {
    * Endpoint: POST paciente/removerPaciente?data={id}
    */
   async remover(id: number): Promise<void> {
-    await api.post(`paciente/removerPaciente?data=${id}`, {})
+    await api.post(`paciente/removerPaciente?data=${id}`, {});
   },
-}
+};

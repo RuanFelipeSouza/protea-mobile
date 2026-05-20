@@ -30,7 +30,11 @@ function createApiInstance(baseURL: string, extraHeaders: Record<string, string>
     async (error) => {
       const status = error.response?.status;
       const url = error.config?.url;
-      const message = error.response?.data ?? error.message;
+      const raw = error.response?.data;
+      const isHtml = typeof raw === 'string' && raw.trimStart().startsWith('<');
+      const message = isHtml
+        ? `[resposta HTML — provavelmente ${status === 404 ? 'rota não existe no backend' : 'erro Django'}]`
+        : (raw ?? error.message);
 
       console.error(`[API] ✗ ${status ?? 'SEM_RESPOSTA'} ${url}`, message);
 
@@ -52,3 +56,21 @@ export const agendaApi = createApiInstance(
   process.env.EXPO_PUBLIC_AGENDA_URL ?? process.env.EXPO_PUBLIC_API_URL ?? '',
   agendaHost ? { Host: agendaHost } : {},
 );
+
+/**
+ * proteaApi: aponta para protea.urls (PacienteController, prontuário, etc).
+ * Usa EXPO_PUBLIC_PROTEA_HOST para rotear via middleware ProteaConfigMult.
+ * Em dev: EXPO_PUBLIC_PROTEA_HOST=localhost → WEBPROTEA_URL=localhost no backend.
+ */
+const proteaHost = process.env.EXPO_PUBLIC_PROTEA_HOST;
+export const proteaApi = createApiInstance(
+  process.env.EXPO_PUBLIC_API_URL ?? '',
+  proteaHost ? { Host: proteaHost } : {},
+);
+
+/**
+ * Host headers para rotear para o urlconf correto no backend em dev.
+ * O backend usa o Host para direcionar entre protea.urls e publico.urls.
+ */
+export const HOST_PROTEA = { Host: 'localhost' }
+export const HOST_PUBLICO = { Host: '10.0.2.2' }
