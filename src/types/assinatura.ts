@@ -10,4 +10,14 @@ export type CertificadoInfo = {
   habilitar: boolean
 }
 
+export type CertificadoAlias = {
+  alias: string
+  subjectDN: string
+}
+
+export type AssinarDocumentoResponse = {
+  tcn: string
+  result: string
+}
+
 export type StatusAssinatura = 'pendente' | 'assinado' | 'erro'

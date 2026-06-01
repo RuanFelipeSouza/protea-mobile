@@ -1,9 +1,10 @@
+import { useMemo } from 'react'
 import { View, Text, Pressable } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import { SearchInput } from '../../molecules'
 import { PatientsList } from '../../organisms'
-import { theme } from '../../../theme'
-import { styles } from './styles'
+import { useTheme } from '../../../theme'
+import { makeStyles } from './styles'
 import type { Patient } from '../../../types/patient'
 
 type PatientsTemplateProps = {
@@ -25,6 +26,9 @@ export function PatientsTemplate({
   onToggleSomenteAtivos,
   onPatientPress,
 }: PatientsTemplateProps) {
+  const { colors } = useTheme()
+  const styles = useMemo(() => makeStyles(colors), [colors])
+
   return (
     <View style={styles.container}>
       <View style={styles.content}>
@@ -38,7 +42,7 @@ export function PatientsTemplate({
           <Ionicons
             name={somenteAtivos ? 'checkmark-circle' : 'ellipse-outline'}
             size={16}
-            color={somenteAtivos ? theme.colors.success[60] : theme.colors.neutral[50]}
+            color={somenteAtivos ? colors.success[60] : colors.neutral[50]}
           />
           <Text style={[styles.filterChipText, somenteAtivos && styles.filterChipTextActive]}>
             {somenteAtivos ? 'Somente ativos' : 'Todos os pacientes'}

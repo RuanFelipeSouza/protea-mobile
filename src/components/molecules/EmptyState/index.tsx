@@ -1,9 +1,10 @@
+import { useMemo } from 'react'
 import { View, Text, Pressable } from 'react-native'
 import type { ComponentProps, ReactNode } from 'react'
 import { Ionicons } from '@expo/vector-icons'
 import { Icon } from '../../atoms'
-import { theme } from '../../../theme'
-import { styles } from './styles'
+import { useTheme } from '../../../theme'
+import { makeStyles } from './styles'
 
 type EmptyStateProps = {
   iconName?: ComponentProps<typeof Ionicons>['name']
@@ -32,9 +33,12 @@ export function EmptyState({
   onActionPress,
   children,
 }: EmptyStateProps) {
+  const { colors } = useTheme()
+  const styles = useMemo(() => makeStyles(colors), [colors])
+
   return (
     <View style={styles.container}>
-      <Icon name={iconName} size={48} color={theme.colors.neutral[40]} />
+      <Icon name={iconName} size={48} color={colors.neutral[40]} />
       <Text style={styles.title}>{title}</Text>
       {message && <Text style={styles.message}>{message}</Text>}
       {children}

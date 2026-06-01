@@ -1,8 +1,9 @@
+import { useMemo } from 'react'
 import { FlatList, View, Text, ActivityIndicator } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import { PatientCard } from '../../molecules'
-import { theme } from '../../../theme'
-import { styles } from './styles'
+import { useTheme } from '../../../theme'
+import { makeStyles } from './styles'
 import type { Patient } from '../../../types/patient'
 
 type PatientsListProps = {
@@ -12,10 +13,13 @@ type PatientsListProps = {
 }
 
 export function PatientsList({ patients, loading, onPress }: PatientsListProps) {
+  const { colors } = useTheme()
+  const styles = useMemo(() => makeStyles(colors), [colors])
+
   if (loading) {
     return (
       <View style={styles.emptyContainer}>
-        <ActivityIndicator size="large" color={theme.colors.primary[80]} />
+        <ActivityIndicator size="large" color={colors.primary[80]} />
       </View>
     )
   }
@@ -33,7 +37,7 @@ export function PatientsList({ patients, loading, onPress }: PatientsListProps) 
       )}
       ListEmptyComponent={
         <View style={styles.emptyContainer}>
-          <Ionicons name="person-outline" size={48} color={theme.colors.neutral[30]} />
+          <Ionicons name="person-outline" size={48} color={colors.neutral[30]} />
           <Text style={styles.emptyText}>Nenhum paciente nesta unidade</Text>
         </View>
       }

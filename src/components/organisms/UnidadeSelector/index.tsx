@@ -3,8 +3,8 @@ import { View, Text } from 'react-native'
 import { Dropdown, type DropdownOption } from '../../molecules'
 import { useUnidades } from '../../../hooks/useUnidades'
 import { useUnidadeStore } from '../../../stores/unidadeStore'
-import { theme } from '../../../theme'
-import { styles } from './styles'
+import { useTheme } from '../../../theme'
+import { makeStyles } from './styles'
 
 type UnidadeSelectorProps = {
   /** Mensagem auxiliar exibida acima do dropdown quando nada está selecionado */
@@ -27,6 +27,8 @@ export function UnidadeSelector({
   hintLabel = 'Selecione a unidade',
   showLabel = true,
 }: UnidadeSelectorProps) {
+  const { colors } = useTheme()
+  const styles = useMemo(() => makeStyles(colors), [colors])
   const { unidades, loading, erro } = useUnidades()
   const selecionada = useUnidadeStore((s) => s.selecionada)
   const setSelecionada = useUnidadeStore((s) => s.setSelecionada)

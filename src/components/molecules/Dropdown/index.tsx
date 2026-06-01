@@ -1,8 +1,8 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { View, Text, Pressable, Modal, FlatList, ActivityIndicator } from 'react-native'
 import { Icon } from '../../atoms'
-import { theme } from '../../../theme'
-import { styles } from './styles'
+import { useTheme } from '../../../theme'
+import { makeStyles } from './styles'
 
 export type DropdownOption<T = string | number> = {
   label: string
@@ -59,6 +59,9 @@ export function Dropdown<T extends string | number>({
 }: DropdownProps<T>) {
   const [internalOpen, setInternalOpen] = useState(false)
 
+  const { colors } = useTheme()
+  const styles = useMemo(() => makeStyles(colors), [colors])
+
   // Use controlled state when `open` prop is provided; otherwise internal.
   const isControlled = controlledOpen !== undefined
   const open = isControlled ? controlledOpen : internalOpen
@@ -91,9 +94,9 @@ export function Dropdown<T extends string | number>({
             {selected?.label ?? placeholder}
           </Text>
           {loading ? (
-            <ActivityIndicator size="small" color={theme.colors.primary[60]} />
+            <ActivityIndicator size="small" color={colors.primary[60]} />
           ) : (
-            <Icon name="chevron-down" size={18} color={theme.colors.neutral[60]} />
+            <Icon name="chevron-down" size={18} color={colors.neutral[60]} />
           )}
         </Pressable>
       )}
@@ -140,7 +143,7 @@ export function Dropdown<T extends string | number>({
                         <Icon
                           name="checkmark"
                           size={18}
-                          color={theme.colors.primary[70]}
+                          color={colors.primary[70]}
                         />
                       )}
                     </Pressable>

@@ -1,9 +1,14 @@
+import { useMemo } from 'react'
 import { View, Text, FlatList, StyleSheet, ActivityIndicator, Dimensions } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import { LineChart } from 'react-native-chart-kit'
 import { useAcompanhamentos } from '../../../../hooks/useAcompanhamentos'
-import { theme } from '../../../../theme'
+import { useTheme } from '../../../../theme'
+import type { darkColors } from '../../../../theme/dark'
+import type { colors as lightColors } from '../../../../theme/colors'
 import type { Acompanhamento } from '../../../../types/acompanhamento'
+
+type Colors = typeof lightColors | typeof darkColors
 
 type AcompanhamentoTabProps = {
   pacienteId: string
@@ -35,7 +40,7 @@ function formatDateLabel(dateStr: string): string {
   return parts.length >= 2 ? `${parts[0]}/${parts[1]}` : dateStr
 }
 
-function PesoChart({ acompanhamentos }: { acompanhamentos: Acompanhamento[] }) {
+function PesoChart({ acompanhamentos, colors, styles }: { acompanhamentos: Acompanhamento[]; colors: Colors; styles: ReturnType<typeof makeStyles> }) {
   const dadosPeso = acompanhamentos
     .filter((a) => a.peso != null && !isNaN(parseFloat(a.peso!)))
     .slice(-6)
@@ -55,19 +60,19 @@ function PesoChart({ acompanhamentos }: { acompanhamentos: Acompanhamento[] }) {
         bezier
         fromZero={false}
         chartConfig={{
-          backgroundColor: theme.colors.neutral[0],
-          backgroundGradientFrom: theme.colors.neutral[0],
-          backgroundGradientTo: theme.colors.neutral[0],
+          backgroundColor: colors.neutral[0],
+          backgroundGradientFrom: colors.neutral[0],
+          backgroundGradientTo: colors.neutral[0],
           decimalPlaces: 1,
-          color: () => theme.colors.primary[70],
-          labelColor: () => theme.colors.neutral[50],
+          color: () => colors.primary[70],
+          labelColor: () => colors.neutral[50],
           propsForDots: {
             r: '4',
             strokeWidth: '2',
-            stroke: theme.colors.primary[80],
+            stroke: colors.primary[80],
           },
           propsForBackgroundLines: {
-            stroke: theme.colors.neutral[20],
+            stroke: colors.neutral[20],
           },
         }}
         style={styles.chart}
@@ -76,7 +81,7 @@ function PesoChart({ acompanhamentos }: { acompanhamentos: Acompanhamento[] }) {
   )
 }
 
-function UltimasMedidas({ acomp }: { acomp: Acompanhamento }) {
+function UltimasMedidas({ acomp, colors, styles }: { acomp: Acompanhamento; colors: Colors; styles: ReturnType<typeof makeStyles> }) {
   const medidas = buildMedidas(acomp)
 
   return (
@@ -87,7 +92,7 @@ function UltimasMedidas({ acomp }: { acomp: Acompanhamento }) {
       </View>
       {acomp.nomeprofissional && (
         <View style={styles.profRow}>
-          <Ionicons name="person-outline" size={13} color={theme.colors.neutral[50]} />
+          <Ionicons name="person-outline" size={13} color={colors.neutral[50]} />
           <Text style={styles.profText}>{acomp.nomeprofissional}</Text>
         </View>
       )}
@@ -111,7 +116,7 @@ function UltimasMedidas({ acomp }: { acomp: Acompanhamento }) {
   )
 }
 
-function HistoricoItem({ acomp }: { acomp: Acompanhamento }) {
+function HistoricoItem({ acomp, styles }: { acomp: Acompanhamento; styles: ReturnType<typeof makeStyles> }) {
   return (
     <View style={styles.historicoCard}>
       <Text style={styles.historicoDate}>{acomp.datastr ?? acomp.data}</Text>
@@ -126,12 +131,14 @@ function HistoricoItem({ acomp }: { acomp: Acompanhamento }) {
 }
 
 export function AcompanhamentoTab({ pacienteId }: AcompanhamentoTabProps) {
+  const { colors } = useTheme()
+  const styles = useMemo(() => makeStyles(colors), [colors])
   const { acompanhamentos, loading, erro } = useAcompanhamentos(pacienteId)
 
   if (loading) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator size="large" color={theme.colors.primary[70]} />
+        <ActivityIndicator size="large" color={colors.primary[70]} />
       </View>
     )
   }
@@ -139,7 +146,7 @@ export function AcompanhamentoTab({ pacienteId }: AcompanhamentoTabProps) {
   if (erro) {
     return (
       <View style={styles.center}>
-        <Ionicons name="alert-circle-outline" size={40} color={theme.colors.error[60]} />
+        <Ionicons name="alert-circle-outline" size={40} color={colors.error[60]} />
         <Text style={styles.erroText}>{erro}</Text>
       </View>
     )
@@ -148,7 +155,7 @@ export function AcompanhamentoTab({ pacienteId }: AcompanhamentoTabProps) {
   if (acompanhamentos.length === 0) {
     return (
       <View style={styles.center}>
-        <Ionicons name="pulse-outline" size={48} color={theme.colors.neutral[30]} />
+        <Ionicons name="pulse-outline" size={48} color={colors.neutral[30]} />
         <Text style={styles.emptyText}>Nenhum acompanhamento registrado</Text>
       </View>
     )
@@ -163,158 +170,160 @@ export function AcompanhamentoTab({ pacienteId }: AcompanhamentoTabProps) {
       contentContainerStyle={styles.list}
       ListHeaderComponent={
         <>
-          <PesoChart acompanhamentos={acompanhamentos} />
-          <UltimasMedidas acomp={ultimo} />
+          <PesoChart acompanhamentos={acompanhamentos} colors={colors} styles={styles} />
+          <UltimasMedidas acomp={ultimo} colors={colors} styles={styles} />
           {historico.length > 0 && (
             <Text style={styles.historicoTitulo}>Histórico</Text>
           )}
         </>
       }
-      renderItem={({ item }) => <HistoricoItem acomp={item} />}
+      renderItem={({ item }) => <HistoricoItem acomp={item} styles={styles} />}
     />
   )
 }
 
-const styles = StyleSheet.create({
-  center: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 12,
-  },
-  erroText: { fontSize: 14, color: theme.colors.error[60] },
-  emptyText: { fontSize: 14, color: theme.colors.neutral[50] },
-  list: {
-    padding: 16,
-    gap: 12,
-  },
-  chartCard: {
-    backgroundColor: theme.colors.neutral[0],
-    borderRadius: 12,
-    padding: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06,
-    shadowRadius: 4,
-    elevation: 2,
-    alignItems: 'center',
-  },
-  chartTitle: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: theme.colors.neutral[60],
-    alignSelf: 'flex-start',
-    marginBottom: 8,
-  },
-  chart: {
-    borderRadius: 8,
-  },
-  card: {
-    backgroundColor: theme.colors.neutral[0],
-    borderRadius: 12,
-    padding: 16,
-    gap: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  cardHeaderRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  cardTitle: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: theme.colors.neutral[90],
-  },
-  cardDate: {
-    fontSize: 12,
-    color: theme.colors.neutral[50],
-  },
-  profRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  profText: {
-    fontSize: 13,
-    color: theme.colors.neutral[60],
-  },
-  medidaGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 10,
-  },
-  medidaItem: {
-    width: '47%',
-    backgroundColor: theme.colors.neutral[10],
-    borderRadius: 8,
-    padding: 10,
-  },
-  medidaLabel: {
-    fontSize: 11,
-    color: theme.colors.neutral[50],
-    marginBottom: 4,
-  },
-  medidaValor: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: theme.colors.neutral[90],
-  },
-  medidaUnidade: {
-    fontSize: 11,
-    fontWeight: '400',
-    color: theme.colors.neutral[50],
-  },
-  obsBox: {
-    backgroundColor: theme.colors.neutral[10],
-    borderRadius: 8,
-    padding: 10,
-    gap: 4,
-  },
-  obsLabel: {
-    fontSize: 11,
-    color: theme.colors.neutral[50],
-  },
-  obsText: {
-    fontSize: 13,
-    color: theme.colors.neutral[80],
-  },
-  historicoTitulo: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: theme.colors.neutral[60],
-    marginTop: 8,
-    marginBottom: 4,
-  },
-  historicoCard: {
-    backgroundColor: theme.colors.neutral[0],
-    borderRadius: 10,
-    padding: 12,
-    gap: 8,
-    borderWidth: 1,
-    borderColor: theme.colors.neutral[20],
-  },
-  historicoDate: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: theme.colors.neutral[70],
-  },
-  historicoRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 6,
-  },
-  historicoChip: {
-    backgroundColor: theme.colors.primary[10],
-    color: theme.colors.primary[80],
-    fontSize: 12,
-    fontWeight: '500',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 12,
-  },
-})
+function makeStyles(c: Colors) {
+  return StyleSheet.create({
+    center: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 12,
+    },
+    erroText: { fontSize: 14, color: c.error[60] },
+    emptyText: { fontSize: 14, color: c.neutral[50] },
+    list: {
+      padding: 16,
+      gap: 12,
+    },
+    chartCard: {
+      backgroundColor: c.neutral[0],
+      borderRadius: 12,
+      padding: 16,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.06,
+      shadowRadius: 4,
+      elevation: 2,
+      alignItems: 'center',
+    },
+    chartTitle: {
+      fontSize: 13,
+      fontWeight: '600',
+      color: c.neutral[60],
+      alignSelf: 'flex-start',
+      marginBottom: 8,
+    },
+    chart: {
+      borderRadius: 8,
+    },
+    card: {
+      backgroundColor: c.neutral[0],
+      borderRadius: 12,
+      padding: 16,
+      gap: 12,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.06,
+      shadowRadius: 4,
+      elevation: 2,
+    },
+    cardHeaderRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    },
+    cardTitle: {
+      fontSize: 15,
+      fontWeight: '700',
+      color: c.neutral[90],
+    },
+    cardDate: {
+      fontSize: 12,
+      color: c.neutral[50],
+    },
+    profRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+    },
+    profText: {
+      fontSize: 13,
+      color: c.neutral[60],
+    },
+    medidaGrid: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: 10,
+    },
+    medidaItem: {
+      width: '47%',
+      backgroundColor: c.neutral[10],
+      borderRadius: 8,
+      padding: 10,
+    },
+    medidaLabel: {
+      fontSize: 11,
+      color: c.neutral[50],
+      marginBottom: 4,
+    },
+    medidaValor: {
+      fontSize: 16,
+      fontWeight: '700',
+      color: c.neutral[90],
+    },
+    medidaUnidade: {
+      fontSize: 11,
+      fontWeight: '400',
+      color: c.neutral[50],
+    },
+    obsBox: {
+      backgroundColor: c.neutral[10],
+      borderRadius: 8,
+      padding: 10,
+      gap: 4,
+    },
+    obsLabel: {
+      fontSize: 11,
+      color: c.neutral[50],
+    },
+    obsText: {
+      fontSize: 13,
+      color: c.neutral[80],
+    },
+    historicoTitulo: {
+      fontSize: 14,
+      fontWeight: '600',
+      color: c.neutral[60],
+      marginTop: 8,
+      marginBottom: 4,
+    },
+    historicoCard: {
+      backgroundColor: c.neutral[0],
+      borderRadius: 10,
+      padding: 12,
+      gap: 8,
+      borderWidth: 1,
+      borderColor: c.neutral[20],
+    },
+    historicoDate: {
+      fontSize: 13,
+      fontWeight: '600',
+      color: c.neutral[70],
+    },
+    historicoRow: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: 6,
+    },
+    historicoChip: {
+      backgroundColor: c.primary[10],
+      color: c.primary[80],
+      fontSize: 12,
+      fontWeight: '500',
+      paddingHorizontal: 8,
+      paddingVertical: 3,
+      borderRadius: 12,
+    },
+  })
+}

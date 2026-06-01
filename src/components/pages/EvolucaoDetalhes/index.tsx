@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import { View, Text, ScrollView, ActivityIndicator, StyleSheet, Pressable, Alert } from 'react-native'
 import { useRouter } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
@@ -7,7 +8,11 @@ import { useEvolucaoDetalhes } from '../../../hooks/useEvolucaoDetalhes'
 import { useAssinaturaCertificada } from '../../../hooks/useAssinaturaCertificada'
 import { SenhaDialog } from '../../molecules/SenhaDialog'
 import { isAssinado } from '../../../types/mobile'
-import { theme } from '../../../theme'
+import { useTheme } from '../../../theme'
+import type { darkColors } from '../../../theme/dark'
+import type { colors as lightColors } from '../../../theme/colors'
+
+type Colors = typeof lightColors | typeof darkColors
 
 type Props = {
   evolucaoId: number
@@ -16,7 +21,9 @@ type Props = {
 
 export function EvolucaoDetalhesPage({ evolucaoId, onBack }: Props) {
   const router = useRouter()
-  const { evolucao, loading, erro } = useEvolucaoDetalhes(evolucaoId)
+  const { colors } = useTheme()
+  const styles = useMemo(() => makeStyles(colors), [colors])
+  const { evolucao, loading, erro, recarregar } = useEvolucaoDetalhes(evolucaoId)
   const { assinar, carregarCertificado, loading: assinandoLoading, erro: erroAssinatura, sucesso, certificadoHabilitado, resetar } = useAssinaturaCertificada()
   const [senhaDialogVisivel, setSenhaDialogVisivel] = useState(false)
 
@@ -29,6 +36,7 @@ export function EvolucaoDetalhesPage({ evolucaoId, onBack }: Props) {
       Alert.alert('Sucesso', 'Documento assinado com sucesso!')
       resetar()
       setSenhaDialogVisivel(false)
+      recarregar()
     }
   }, [sucesso])
 
@@ -72,13 +80,13 @@ export function EvolucaoDetalhesPage({ evolucaoId, onBack }: Props) {
 
       {loading && (
         <View style={styles.center}>
-          <ActivityIndicator size="large" color={theme.colors.primary[70]} />
+          <ActivityIndicator size="large" color={colors.primary[70]} />
         </View>
       )}
 
       {erro && (
         <View style={styles.center}>
-          <Ionicons name="alert-circle-outline" size={40} color={theme.colors.error[40]} />
+          <Ionicons name="alert-circle-outline" size={40} color={colors.error[40]} />
           <Text style={styles.erroText}>{erro}</Text>
         </View>
       )}
@@ -88,7 +96,7 @@ export function EvolucaoDetalhesPage({ evolucaoId, onBack }: Props) {
           <ScrollView contentContainerStyle={styles.content}>
             <View style={styles.headerInfo}>
               <View style={styles.infoRow}>
-                <Ionicons name="calendar-outline" size={16} color={theme.colors.primary[60]} />
+                <Ionicons name="calendar-outline" size={16} color={colors.primary[60]} />
                 <Text style={styles.label}>{evolucao.data}</Text>
                 {evolucao.hora && <Text style={styles.label}>· {evolucao.hora}</Text>}
               </View>
@@ -96,14 +104,14 @@ export function EvolucaoDetalhesPage({ evolucaoId, onBack }: Props) {
 
               {isAssinado(evolucao) && (
                 <View style={styles.assinadoBadge}>
-                  <Ionicons name="checkmark-circle" size={14} color={theme.colors.success[60]} />
+                  <Ionicons name="checkmark-circle" size={14} color={colors.success[60]} />
                   <Text style={styles.assinadoText}>Assinado</Text>
                 </View>
               )}
             </View>
 
             <View style={styles.pacienteInfo}>
-              <Ionicons name="person-outline" size={16} color={theme.colors.neutral[60]} />
+              <Ionicons name="person-outline" size={16} color={colors.neutral[60]} />
               <Text style={styles.pacienteNome}>{evolucao.paciente_nome}</Text>
             </View>
 
@@ -114,7 +122,7 @@ export function EvolucaoDetalhesPage({ evolucaoId, onBack }: Props) {
 
             {evolucao.pode_assinar && !isAssinado(evolucao) && (
               <View style={styles.assinatureInfo}>
-                <Ionicons name="information-circle" size={16} color={theme.colors.secondary[60]} />
+                <Ionicons name="information-circle" size={16} color={colors.secondary[60]} />
                 <Text style={styles.assinatureInfoText}>
                   Esta evolução está pendente de assinatura
                 </Text>
@@ -153,143 +161,145 @@ export function EvolucaoDetalhesPage({ evolucaoId, onBack }: Props) {
   )
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: theme.colors.neutral[10],
-  },
-  center: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 12,
-  },
-  content: {
-    padding: 16,
-    gap: 16,
-  },
-  headerInfo: {
-    backgroundColor: theme.colors.neutral[0],
-    borderRadius: 10,
-    padding: 14,
-    gap: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06,
-    shadowRadius: 2,
-    elevation: 1,
-  },
-  infoRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: theme.colors.neutral[80],
-  },
-  tipo: {
-    fontSize: 15,
-    color: theme.colors.primary[70],
-    fontWeight: '500',
-  },
-  pacienteInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    backgroundColor: theme.colors.neutral[0],
-    borderRadius: 10,
-    padding: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06,
-    shadowRadius: 2,
-    elevation: 1,
-  },
-  pacienteNome: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: theme.colors.neutral[80],
-  },
-  conteudoContainer: {
-    backgroundColor: theme.colors.neutral[0],
-    borderRadius: 10,
-    padding: 14,
-    gap: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06,
-    shadowRadius: 2,
-    elevation: 1,
-    marginBottom: 20,
-  },
-  conteudoLabel: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: theme.colors.neutral[60],
-    textTransform: 'uppercase',
-  },
-  conteudo: {
-    fontSize: 14,
-    lineHeight: 22,
-    color: theme.colors.neutral[80],
-  },
-  erroText: {
-    fontSize: 14,
-    color: theme.colors.error[40],
-    textAlign: 'center',
-  },
-  assinadoBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    backgroundColor: theme.colors.primary[10],
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 16,
-    alignSelf: 'flex-start',
-  },
-  assinadoText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: theme.colors.primary[70],
-  },
-  assinatureInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    backgroundColor: theme.colors.secondary[10],
-    borderRadius: 10,
-    padding: 12,
-  },
-  assinatureInfoText: {
-    fontSize: 13,
-    color: theme.colors.secondary[80],
-    flex: 1,
-  },
-  footer: {
-    padding: 16,
-    paddingBottom: 24,
-    backgroundColor: 'white',
-    borderTopWidth: 1,
-    borderTopColor: theme.colors.neutral[20],
-  },
-  assinarButton: {
-    backgroundColor: theme.colors.primary[70],
-    paddingVertical: 14,
-    borderRadius: 10,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-  },
-  assinarButtonDisabled: {
-    backgroundColor: theme.colors.neutral[30],
-  },
-  assinarButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: 'white',
-  },
-})
+function makeStyles(c: Colors) {
+  return StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: c.neutral[10],
+    },
+    center: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 12,
+    },
+    content: {
+      padding: 16,
+      gap: 16,
+    },
+    headerInfo: {
+      backgroundColor: c.neutral[0],
+      borderRadius: 10,
+      padding: 14,
+      gap: 10,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.06,
+      shadowRadius: 2,
+      elevation: 1,
+    },
+    infoRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+    },
+    label: {
+      fontSize: 14,
+      fontWeight: '600',
+      color: c.neutral[80],
+    },
+    tipo: {
+      fontSize: 15,
+      color: c.primary[70],
+      fontWeight: '500',
+    },
+    pacienteInfo: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+      backgroundColor: c.neutral[0],
+      borderRadius: 10,
+      padding: 12,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.06,
+      shadowRadius: 2,
+      elevation: 1,
+    },
+    pacienteNome: {
+      fontSize: 14,
+      fontWeight: '500',
+      color: c.neutral[80],
+    },
+    conteudoContainer: {
+      backgroundColor: c.neutral[0],
+      borderRadius: 10,
+      padding: 14,
+      gap: 10,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.06,
+      shadowRadius: 2,
+      elevation: 1,
+      marginBottom: 20,
+    },
+    conteudoLabel: {
+      fontSize: 13,
+      fontWeight: '600',
+      color: c.neutral[60],
+      textTransform: 'uppercase',
+    },
+    conteudo: {
+      fontSize: 14,
+      lineHeight: 22,
+      color: c.neutral[80],
+    },
+    erroText: {
+      fontSize: 14,
+      color: c.error[40],
+      textAlign: 'center',
+    },
+    assinadoBadge: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+      backgroundColor: c.primary[10],
+      paddingHorizontal: 10,
+      paddingVertical: 6,
+      borderRadius: 16,
+      alignSelf: 'flex-start',
+    },
+    assinadoText: {
+      fontSize: 12,
+      fontWeight: '600',
+      color: c.primary[70],
+    },
+    assinatureInfo: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+      backgroundColor: c.secondary[10],
+      borderRadius: 10,
+      padding: 12,
+    },
+    assinatureInfoText: {
+      fontSize: 13,
+      color: c.secondary[80],
+      flex: 1,
+    },
+    footer: {
+      padding: 16,
+      paddingBottom: 24,
+      backgroundColor: c.neutral[0],
+      borderTopWidth: 1,
+      borderTopColor: c.neutral[20],
+    },
+    assinarButton: {
+      backgroundColor: c.primary[70],
+      paddingVertical: 14,
+      borderRadius: 10,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 8,
+    },
+    assinarButtonDisabled: {
+      backgroundColor: c.neutral[30],
+    },
+    assinarButtonText: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: 'white',
+    },
+  })
+}

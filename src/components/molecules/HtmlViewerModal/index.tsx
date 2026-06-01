@@ -1,8 +1,13 @@
+import { useMemo } from 'react'
 import { View, Text, Pressable, Modal, StyleSheet } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { WebView } from 'react-native-webview'
 import { Ionicons } from '@expo/vector-icons'
-import { theme } from '../../../theme'
+import { useTheme } from '../../../theme'
+import type { darkColors } from '../../../theme/dark'
+import type { colors as lightColors } from '../../../theme/colors'
+
+type Colors = typeof lightColors | typeof darkColors
 
 type HtmlViewerModalProps = {
   visible: boolean
@@ -20,6 +25,45 @@ function wrapHtml(content: string): string {
   </style></head><body>${content}</body></html>`
 }
 
+function makeStyles(c: Colors) {
+  return StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: c.neutral[0],
+    },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 16,
+      padding: 16,
+      borderBottomWidth: 1,
+      borderBottomColor: c.neutral[20],
+    },
+    titleBlock: {
+      flex: 1,
+    },
+    title: {
+      fontSize: 16,
+      fontWeight: '700',
+      color: c.neutral[90],
+    },
+    subtitle: {
+      fontSize: 12,
+      color: c.neutral[50],
+      marginTop: 2,
+    },
+    empty: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    emptyText: {
+      fontSize: 14,
+      color: c.neutral[50],
+    },
+  })
+}
+
 export function HtmlViewerModal({
   visible,
   onClose,
@@ -28,12 +72,15 @@ export function HtmlViewerModal({
   html,
   emptyMessage = 'Conteúdo não disponível',
 }: HtmlViewerModalProps) {
+  const { colors } = useTheme()
+  const styles = useMemo(() => makeStyles(colors), [colors])
+
   return (
     <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
       <SafeAreaView style={styles.container}>
         <View style={styles.header}>
           <Pressable onPress={onClose} hitSlop={8}>
-            <Ionicons name="close" size={24} color={theme.colors.neutral[80]} />
+            <Ionicons name="close" size={24} color={colors.neutral[80]} />
           </Pressable>
           <View style={styles.titleBlock}>
             <Text style={styles.title} numberOfLines={1}>{title}</Text>
@@ -56,40 +103,3 @@ export function HtmlViewerModal({
     </Modal>
   )
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: theme.colors.neutral[0],
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 16,
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.neutral[20],
-  },
-  titleBlock: {
-    flex: 1,
-  },
-  title: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: theme.colors.neutral[90],
-  },
-  subtitle: {
-    fontSize: 12,
-    color: theme.colors.neutral[50],
-    marginTop: 2,
-  },
-  empty: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  emptyText: {
-    fontSize: 14,
-    color: theme.colors.neutral[50],
-  },
-})

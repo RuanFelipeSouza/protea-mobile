@@ -1,44 +1,64 @@
-import { View, Text, FlatList, ActivityIndicator, StyleSheet, ScrollView, Pressable } from 'react-native'
-import { useRouter } from 'expo-router'
-import { Ionicons } from '@expo/vector-icons'
-import { HeaderBar } from '../../organisms'
-import { useEvolucoesDoPaciente } from '../../../hooks/useEvolucoesDoPaciente'
-import { theme } from '../../../theme'
-import type { EvolucaoStatus } from '../../../types/mobile'
+import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import { useMemo } from 'react';
+import {
+  ActivityIndicator,
+  FlatList,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
+import { useEvolucoesDoPaciente } from '../../../hooks/useEvolucoesDoPaciente';
+import { useTheme } from '../../../theme';
+import type { colors as lightColors } from '../../../theme/colors';
+import type { darkColors } from '../../../theme/dark';
+import type { EvolucaoStatus } from '../../../types/mobile';
+import { HeaderBar } from '../../organisms';
+
+type Colors = typeof lightColors | typeof darkColors;
 
 type Props = {
-  unidadeId: number
-  pacienteId: number
-  pacienteNome?: string
-  nomePaciente?: string
-}
+  unidadeId: number;
+  pacienteId: number;
+  pacienteNome?: string;
+  nomePaciente?: string;
+};
 
 const STATUS_LABELS: Record<EvolucaoStatus, string> = {
   realizada: 'Realizada',
   pendente: 'Pendente',
   cancelada: 'Cancelada',
-}
+};
 
-const STATUS_COLORS: Record<EvolucaoStatus, string> = {
-  realizada: theme.colors.success?.[60] ?? '#4CAF50',
-  pendente: theme.colors.warning?.[60] ?? '#FF9800',
-  cancelada: theme.colors.error?.[40] ?? '#F44336',
-}
-
-export function EvolucoesDoPacientePage({ unidadeId, pacienteId, pacienteNome, nomePaciente }: Props) {
-  const router = useRouter()
+export function EvolucoesDoPacientePage({
+  unidadeId,
+  pacienteId,
+  pacienteNome,
+  nomePaciente,
+}: Props) {
+  const router = useRouter();
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const { evolucoes, loading, erro, statusDisponiveis, statusSelecionado, setStatusFiltro } =
-    useEvolucoesDoPaciente(unidadeId, pacienteId)
+    useEvolucoesDoPaciente(unidadeId, pacienteId);
 
-  const handleCardPress = (evolucao: EvolucaoMobile) => {
+  const STATUS_COLORS: Record<EvolucaoStatus, string> = {
+    realizada: colors.success[60],
+    pendente: colors.warning[60],
+    cancelada: colors.error[40],
+  };
+
+  const handleCardPress = (evolucao: any) => {
     router.push({
       pathname: '/prontuario/[id]/evolucao/[evolucao_id]',
       params: {
         id: pacienteId,
         evolucao_id: evolucao.id,
       },
-    })
-  }
+    });
+  };
 
   return (
     <View style={styles.container}>
@@ -52,13 +72,13 @@ export function EvolucoesDoPacientePage({ unidadeId, pacienteId, pacienteNome, n
 
       {loading && (
         <View style={styles.center}>
-          <ActivityIndicator size="large" color={theme.colors.primary[70]} />
+          <ActivityIndicator size="large" color={colors.primary[70]} />
         </View>
       )}
 
       {erro && (
         <View style={styles.center}>
-          <Ionicons name="alert-circle-outline" size={40} color={theme.colors.error[40]} />
+          <Ionicons name="alert-circle-outline" size={40} color={colors.error[40]} />
           <Text style={styles.erroText}>{erro}</Text>
         </View>
       )}
@@ -69,19 +89,17 @@ export function EvolucoesDoPacientePage({ unidadeId, pacienteId, pacienteNome, n
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
+              style={styles.filterScrollView}
               contentContainerStyle={styles.filterContainer}
             >
               <Pressable
-                style={[
-                  styles.filterChip,
-                  statusSelecionado === null && styles.filterChipActive,
-                ]}
+                style={[styles.filterChip, statusSelecionado === null && styles.filterChipActive]}
                 onPress={() => setStatusFiltro(null)}
               >
                 <Ionicons
                   name={statusSelecionado === null ? 'checkmark-circle' : 'ellipse-outline'}
                   size={16}
-                  color={statusSelecionado === null ? theme.colors.primary[70] : theme.colors.neutral[50]}
+                  color={statusSelecionado === null ? colors.primary[70] : colors.neutral[50]}
                 />
                 <Text
                   style={[
@@ -105,7 +123,9 @@ export function EvolucoesDoPacientePage({ unidadeId, pacienteId, pacienteNome, n
                   <Ionicons
                     name={statusSelecionado === status ? 'checkmark-circle' : 'ellipse-outline'}
                     size={16}
-                    color={statusSelecionado === status ? STATUS_COLORS[status] : theme.colors.neutral[50]}
+                    color={
+                      statusSelecionado === status ? STATUS_COLORS[status] : colors.neutral[50]
+                    }
                   />
                   <Text
                     style={[
@@ -133,11 +153,7 @@ export function EvolucoesDoPacientePage({ unidadeId, pacienteId, pacienteNome, n
             }
             ListEmptyComponent={
               <View style={styles.center}>
-                <Ionicons
-                  name="document-text-outline"
-                  size={48}
-                  color={theme.colors.neutral[40]}
-                />
+                <Ionicons name="document-text-outline" size={48} color={colors.neutral[40]} />
                 <Text style={styles.emptyText}>Nenhuma evolução encontrada</Text>
               </View>
             }
@@ -145,23 +161,16 @@ export function EvolucoesDoPacientePage({ unidadeId, pacienteId, pacienteNome, n
               <Pressable
                 style={styles.card}
                 onPress={() => handleCardPress(item)}
-                android_ripple={{ color: theme.colors.primary[10] }}
+                android_ripple={{ color: colors.primary[10] }}
               >
                 <View style={styles.cardHeader}>
                   <View style={styles.dateRow}>
-                    <Ionicons
-                      name="calendar-outline"
-                      size={15}
-                      color={theme.colors.primary[60]}
-                    />
+                    <Ionicons name="calendar-outline" size={15} color={colors.primary[60]} />
                     <Text style={styles.data}>{item.data}</Text>
                     {item.hora && <Text style={styles.hora}>· {item.hora}</Text>}
                   </View>
                   <View
-                    style={[
-                      styles.statusBadge,
-                      { backgroundColor: STATUS_COLORS[item.status] },
-                    ]}
+                    style={[styles.statusBadge, { backgroundColor: STATUS_COLORS[item.status] }]}
                   >
                     <Text style={styles.statusBadgeText}>{STATUS_LABELS[item.status]}</Text>
                   </View>
@@ -172,112 +181,118 @@ export function EvolucoesDoPacientePage({ unidadeId, pacienteId, pacienteNome, n
           />
         </>
       )}
-
     </View>
-  )
+  );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: theme.colors.neutral[10],
-  },
-  center: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 12,
-    paddingTop: 60,
-  },
-  filterContainer: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    gap: 8,
-  },
-  filterChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 20,
-    backgroundColor: theme.colors.neutral[0],
-    borderWidth: 1,
-    borderColor: theme.colors.neutral[20],
-  },
-  filterChipActive: {
-    borderColor: theme.colors.primary[70],
-  },
-  filterChipText: {
-    fontSize: 13,
-    fontWeight: '500',
-    color: theme.colors.neutral[50],
-  },
-  filterChipTextActive: {
-    color: theme.colors.primary[70],
-  },
-  list: {
-    padding: 16,
-    gap: 8,
-  },
-  count: {
-    fontSize: 13,
-    color: theme.colors.neutral[60],
-    marginBottom: 8,
-  },
-  card: {
-    backgroundColor: theme.colors.neutral[0],
-    borderRadius: 10,
-    padding: 14,
-    gap: 6,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06,
-    shadowRadius: 2,
-    elevation: 1,
-  },
-  cardHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  dateRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 5,
-  },
-  data: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: theme.colors.neutral[80],
-  },
-  hora: {
-    fontSize: 13,
-    color: theme.colors.neutral[60],
-  },
-  tipo: {
-    fontSize: 13,
-    color: theme.colors.primary[70],
-    fontWeight: '500',
-  },
-  statusBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
-  },
-  statusBadgeText: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: theme.colors.neutral[0],
-  },
-  erroText: {
-    fontSize: 14,
-    color: theme.colors.error[40],
-    textAlign: 'center',
-  },
-  emptyText: {
-    fontSize: 15,
-    color: theme.colors.neutral[60],
-    textAlign: 'center',
-  },
-})
+function makeStyles(c: Colors) {
+  return StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: c.neutral[10],
+    },
+    center: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 12,
+      paddingTop: 60,
+    },
+    filterScrollView: {
+      height: 52,
+      flexShrink: 0,
+    },
+    filterContainer: {
+      paddingHorizontal: 16,
+      paddingVertical: 12,
+      gap: 8,
+      alignItems: 'center' as const,
+    },
+    filterChip: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+      paddingVertical: 6,
+      paddingHorizontal: 12,
+      borderRadius: 20,
+      backgroundColor: c.neutral[0],
+      borderWidth: 1,
+      borderColor: c.neutral[20],
+    },
+    filterChipActive: {
+      borderColor: c.primary[70],
+    },
+    filterChipText: {
+      fontSize: 13,
+      fontWeight: '500',
+      color: c.neutral[50],
+    },
+    filterChipTextActive: {
+      color: c.primary[70],
+    },
+    list: {
+      padding: 16,
+      gap: 8,
+    },
+    count: {
+      fontSize: 13,
+      color: c.neutral[60],
+      marginBottom: 8,
+    },
+    card: {
+      backgroundColor: c.neutral[0],
+      borderRadius: 10,
+      padding: 14,
+      gap: 6,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.06,
+      shadowRadius: 2,
+      elevation: 1,
+    },
+    cardHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
+    dateRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 5,
+    },
+    data: {
+      fontSize: 14,
+      fontWeight: '600',
+      color: c.neutral[80],
+    },
+    hora: {
+      fontSize: 13,
+      color: c.neutral[60],
+    },
+    tipo: {
+      fontSize: 13,
+      color: c.primary[70],
+      fontWeight: '500',
+    },
+    statusBadge: {
+      paddingHorizontal: 8,
+      paddingVertical: 4,
+      borderRadius: 6,
+    },
+    statusBadgeText: {
+      fontSize: 11,
+      fontWeight: '600',
+      color: c.neutral[0],
+    },
+    erroText: {
+      fontSize: 14,
+      color: c.error[40],
+      textAlign: 'center',
+    },
+    emptyText: {
+      fontSize: 15,
+      color: c.neutral[60],
+      textAlign: 'center',
+    },
+  });
+}

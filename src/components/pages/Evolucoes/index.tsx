@@ -1,41 +1,49 @@
-import { useState } from 'react'
-import { View, Text, FlatList, Pressable, ActivityIndicator, StyleSheet, ScrollView } from 'react-native'
-import { useRouter } from 'expo-router'
-import { Ionicons } from '@expo/vector-icons'
-import { HeaderBar, UnidadeRequired } from '../../organisms'
-import { HtmlViewerModal } from '../../molecules'
-import { useEvolucoesPendentes } from '../../../hooks/useEvolucoesPendentes'
-import { useEvolucaoDetalhes } from '../../../hooks/useEvolucaoDetalhes'
-import { theme } from '../../../theme'
-import type { EvolucaoPendente, EvolucaoStatusType } from '../../../types/evolucaoPendente'
+import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import { useMemo } from 'react';
+import {
+  ActivityIndicator,
+  FlatList,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
+import { useEvolucoesPendentes } from '../../../hooks/useEvolucoesPendentes';
+import { useTheme } from '../../../theme';
+import type { colors as lightColors } from '../../../theme/colors';
+import type { darkColors } from '../../../theme/dark';
+import type { EvolucaoPendente, EvolucaoStatusType } from '../../../types/evolucaoPendente';
+import { HeaderBar, UnidadeRequired } from '../../organisms';
+
+type Colors = typeof lightColors | typeof darkColors;
 
 const STATUS_LABELS: Record<EvolucaoStatusType, string> = {
   realizada: 'Realizada',
   pendente: 'Pendente',
   cancelada: 'Cancelada',
-}
-
-const STATUS_COLORS: Record<EvolucaoStatusType, string> = {
-  realizada: theme.colors.success?.[60] ?? '#4CAF50',
-  pendente: theme.colors.warning?.[60] ?? '#FF9800',
-  cancelada: theme.colors.error?.[40] ?? '#F44336',
-}
+};
 
 export function EvolucoesPendentesPage() {
-  const router = useRouter()
+  const router = useRouter();
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const { evolucoes, loading, erro, statusDisponiveis, statusSelecionado, setStatusFiltro } =
-    useEvolucoesPendentes()
-  const [selecionada, setSelecionada] = useState<EvolucaoPendente | null>(null)
-  const { evolucao: detalhes, loading: carregandoDetalhes } = useEvolucaoDetalhes(
-    selecionada?.id ?? 0,
-  )
+    useEvolucoesPendentes();
 
-  function formatId(id: number): string {
-    return `#${id.toString().padStart(4, '0')}`
-  }
+  const STATUS_COLORS: Record<EvolucaoStatusType, string> = {
+    realizada: colors.success[60],
+    pendente: colors.warning[60],
+    cancelada: colors.error[40],
+  };
 
   function handleCardPress(evolucao: EvolucaoPendente) {
-    setSelecionada(evolucao)
+    if (!evolucao.pacienteid) return;
+    router.push({
+      pathname: '/prontuario/[id]/evolucao/[evolucao_id]',
+      params: { id: evolucao.pacienteid, evolucao_id: evolucao.id },
+    } as never);
   }
 
   return (
@@ -45,36 +53,34 @@ export function EvolucoesPendentesPage() {
       <UnidadeRequired contextMessage="Selecione a unidade na home para visualizar as evoluções.">
         {loading && (
           <View style={styles.center}>
-            <ActivityIndicator size="large" color={theme.colors.primary[70]} />
+            <ActivityIndicator size="large" color={colors.primary[70]} />
           </View>
         )}
 
         {erro && (
           <View style={styles.center}>
-            <Ionicons name="alert-circle-outline" size={40} color={theme.colors.error[40]} />
+            <Ionicons name="alert-circle-outline" size={40} color={colors.error[40]} />
             <Text style={styles.erroText}>{erro}</Text>
           </View>
         )}
 
         {!loading && !erro && (
-          <>
+          <View style={styles.content}>
             {statusDisponiveis.length > 0 && (
               <ScrollView
                 horizontal
                 showsHorizontalScrollIndicator={false}
+                style={styles.filterScrollView}
                 contentContainerStyle={styles.filterContainer}
               >
                 <Pressable
-                  style={[
-                    styles.filterChip,
-                    statusSelecionado === null && styles.filterChipActive,
-                  ]}
+                  style={[styles.filterChip, statusSelecionado === null && styles.filterChipActive]}
                   onPress={() => setStatusFiltro(null)}
                 >
                   <Ionicons
                     name={statusSelecionado === null ? 'checkmark-circle' : 'ellipse-outline'}
                     size={16}
-                    color={statusSelecionado === null ? theme.colors.primary[70] : theme.colors.neutral[50]}
+                    color={statusSelecionado === null ? colors.primary[70] : colors.neutral[50]}
                   />
                   <Text
                     style={[
@@ -98,7 +104,9 @@ export function EvolucoesPendentesPage() {
                     <Ionicons
                       name={statusSelecionado === status ? 'checkmark-circle' : 'ellipse-outline'}
                       size={16}
-                      color={statusSelecionado === status ? STATUS_COLORS[status] : theme.colors.neutral[50]}
+                      color={
+                        statusSelecionado === status ? STATUS_COLORS[status] : colors.neutral[50]
+                      }
                     />
                     <Text
                       style={[
@@ -126,11 +134,7 @@ export function EvolucoesPendentesPage() {
               }
               ListEmptyComponent={
                 <View style={styles.center}>
-                  <Ionicons
-                    name="document-text-outline"
-                    size={48}
-                    color={theme.colors.neutral[40]}
-                  />
+                  <Ionicons name="document-text-outline" size={48} color={colors.neutral[40]} />
                   <Text style={styles.emptyText}>Nenhuma evolução encontrada</Text>
                 </View>
               }
@@ -153,157 +157,138 @@ export function EvolucoesPendentesPage() {
                     )}
                   </View>
                   <View
-                    style={[
-                      styles.statusBadge,
-                      { backgroundColor: STATUS_COLORS[item.status] },
-                    ]}
+                    style={[styles.statusBadge, { backgroundColor: STATUS_COLORS[item.status] }]}
                   >
                     <Text style={styles.statusBadgeText}>{STATUS_LABELS[item.status]}</Text>
                   </View>
-                  <Ionicons name="chevron-forward" size={20} color={theme.colors.neutral[40]} />
+                  <Ionicons name="chevron-forward" size={20} color={colors.neutral[40]} />
                 </Pressable>
               )}
             />
-          </>
-        )}
-
-        {carregandoDetalhes && (
-          <View style={styles.modalLoading}>
-            <ActivityIndicator size="large" color={theme.colors.primary[70]} />
           </View>
         )}
-
-        <HtmlViewerModal
-          visible={!!selecionada && !carregandoDetalhes}
-          onClose={() => setSelecionada(null)}
-          title={selecionada ? `Evolução ${formatId(selecionada.id)}` : ''}
-          subtitle={
-            selecionada
-              ? `${selecionada.dataform}${selecionada.hora ? ` · ${selecionada.hora}` : ''}`
-              : undefined
-          }
-          html={detalhes?.evolucao ?? null}
-        />
       </UnidadeRequired>
     </View>
-  )
+  );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: theme.colors.neutral[10],
-  },
-  center: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 12,
-    paddingTop: 60,
-  },
-  filterContainer: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    gap: 8,
-  },
-  filterChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 20,
-    backgroundColor: theme.colors.neutral[0],
-    borderWidth: 1,
-    borderColor: theme.colors.neutral[20],
-  },
-  filterChipActive: {
-    borderColor: theme.colors.primary[70],
-  },
-  filterChipText: {
-    fontSize: 13,
-    fontWeight: '500',
-    color: theme.colors.neutral[50],
-  },
-  filterChipTextActive: {
-    color: theme.colors.primary[70],
-  },
-  list: {
-    padding: 16,
-    gap: 8,
-  },
-  count: {
-    fontSize: 13,
-    color: theme.colors.neutral[60],
-    marginBottom: 8,
-  },
-  card: {
-    backgroundColor: theme.colors.neutral[0],
-    borderRadius: 10,
-    padding: 14,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06,
-    shadowRadius: 2,
-    elevation: 1,
-  },
-  cardLeft: {
-    flex: 1,
-    gap: 3,
-  },
-  cardRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  pacienteNome: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: theme.colors.neutral[90],
-  },
-  tipo: {
-    fontSize: 13,
-    color: theme.colors.primary[70],
-    fontWeight: '500',
-  },
-  data: {
-    fontSize: 13,
-    color: theme.colors.neutral[60],
-  },
-  profissional: {
-    fontSize: 12,
-    color: theme.colors.neutral[50],
-  },
-  statusBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
-  },
-  statusBadgeText: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: theme.colors.neutral[0],
-  },
-  erroText: {
-    fontSize: 14,
-    color: theme.colors.error[40],
-    textAlign: 'center',
-  },
-  emptyText: {
-    fontSize: 15,
-    color: theme.colors.neutral[60],
-    textAlign: 'center',
-  },
-  modalLoading: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.3)',
-  },
-})
+function makeStyles(c: Colors) {
+  return StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: c.neutral[10],
+    },
+    center: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 12,
+      paddingTop: 60,
+    },
+    content: {
+      flex: 1,
+    },
+    filterScrollView: {
+      height: 58,
+      flexShrink: 0,
+      flexGrow: 0,
+    },
+    filterContainer: {
+      paddingHorizontal: 16,
+      paddingVertical: 12,
+      gap: 8,
+      alignItems: 'center' as const,
+    },
+    filterChip: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      alignSelf: 'flex-start',
+      gap: 6,
+      paddingVertical: 6,
+      paddingHorizontal: 12,
+      borderRadius: 20,
+      backgroundColor: c.neutral[0],
+      borderWidth: 1,
+      borderColor: c.neutral[20],
+    },
+    filterChipActive: {
+      borderColor: c.primary[70],
+    },
+    filterChipText: {
+      fontSize: 13,
+      fontWeight: '500',
+      color: c.neutral[50],
+    },
+    filterChipTextActive: {
+      color: c.primary[70],
+    },
+    list: {
+      padding: 16,
+      gap: 8,
+    },
+    count: {
+      fontSize: 13,
+      color: c.neutral[60],
+      marginBottom: 8,
+    },
+    card: {
+      backgroundColor: c.neutral[0],
+      borderRadius: 10,
+      padding: 14,
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.06,
+      shadowRadius: 2,
+      elevation: 1,
+    },
+    cardLeft: {
+      flex: 1,
+      gap: 3,
+    },
+    cardRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    pacienteNome: {
+      fontSize: 15,
+      fontWeight: '600',
+      color: c.neutral[90],
+    },
+    tipo: {
+      fontSize: 13,
+      color: c.primary[70],
+      fontWeight: '500',
+    },
+    data: {
+      fontSize: 13,
+      color: c.neutral[60],
+    },
+    profissional: {
+      fontSize: 12,
+      color: c.neutral[50],
+    },
+    statusBadge: {
+      paddingHorizontal: 8,
+      paddingVertical: 4,
+      borderRadius: 6,
+    },
+    statusBadgeText: {
+      fontSize: 11,
+      fontWeight: '600',
+      color: c.neutral[0],
+    },
+    erroText: {
+      fontSize: 14,
+      color: c.error[40],
+      textAlign: 'center',
+    },
+    emptyText: {
+      fontSize: 15,
+      color: c.neutral[60],
+      textAlign: 'center',
+    },
+  });
+}

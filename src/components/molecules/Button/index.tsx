@@ -1,5 +1,7 @@
+import { useMemo } from 'react'
 import { Pressable, Text } from 'react-native'
-import { styles } from './styles'
+import { useTheme } from '../../../theme'
+import { makeStyles } from './styles'
 
 type ButtonProps = {
   label: string
@@ -9,6 +11,9 @@ type ButtonProps = {
 }
 
 export function Button({ label, onPress, variant = 'primary', disabled = false }: ButtonProps) {
+  const { colors } = useTheme()
+  const styles = useMemo(() => makeStyles(colors), [colors])
+
   return (
     <Pressable
       style={[styles.base, variant === 'primary' ? styles.primary : styles.ghost]}

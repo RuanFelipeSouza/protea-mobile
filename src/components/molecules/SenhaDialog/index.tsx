@@ -1,7 +1,12 @@
+import { useMemo } from 'react'
 import { View, Text, StyleSheet, TextInput, Pressable, Modal, ActivityIndicator } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
-import { theme } from '../../../theme'
+import { useTheme } from '../../../theme'
 import { useState } from 'react'
+import type { darkColors } from '../../../theme/dark'
+import type { colors as lightColors } from '../../../theme/colors'
+
+type Colors = typeof lightColors | typeof darkColors
 
 type Props = {
   visible: boolean
@@ -11,6 +16,8 @@ type Props = {
 }
 
 export function SenhaDialog({ visible, onClose, onSubmit, loading = false }: Props) {
+  const { colors } = useTheme()
+  const styles = useMemo(() => makeStyles(colors), [colors])
   const [senha, setSenha] = useState('')
   const [mostrarSenha, setMostrarSenha] = useState(false)
 
@@ -39,7 +46,7 @@ export function SenhaDialog({ visible, onClose, onSubmit, loading = false }: Pro
           <View style={styles.header}>
             <Text style={styles.title}>Confirmar Assinatura</Text>
             <Pressable onPress={handleClose} disabled={loading}>
-              <Ionicons name="close" size={24} color={theme.colors.neutral[70]} />
+              <Ionicons name="close" size={24} color={colors.neutral[70]} />
             </Pressable>
           </View>
 
@@ -55,7 +62,7 @@ export function SenhaDialog({ visible, onClose, onSubmit, loading = false }: Pro
               value={senha}
               onChangeText={setSenha}
               editable={!loading}
-              placeholderTextColor={theme.colors.neutral[50]}
+              placeholderTextColor={colors.neutral[50]}
             />
             <Pressable
               onPress={() => setMostrarSenha(!mostrarSenha)}
@@ -65,7 +72,7 @@ export function SenhaDialog({ visible, onClose, onSubmit, loading = false }: Pro
               <Ionicons
                 name={mostrarSenha ? 'eye-off' : 'eye'}
                 size={20}
-                color={theme.colors.neutral[60]}
+                color={colors.neutral[60]}
               />
             </Pressable>
           </View>
@@ -97,83 +104,85 @@ export function SenhaDialog({ visible, onClose, onSubmit, loading = false }: Pro
   )
 }
 
-const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  container: {
-    backgroundColor: 'white',
-    borderRadius: 12,
-    padding: 20,
-    width: '85%',
-    maxWidth: 400,
-    gap: 16,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: theme.colors.neutral[90],
-  },
-  description: {
-    fontSize: 14,
-    color: theme.colors.neutral[70],
-    lineHeight: 20,
-  },
-  inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: theme.colors.neutral[30],
-    borderRadius: 8,
-    paddingRight: 12,
-  },
-  input: {
-    flex: 1,
-    paddingVertical: 12,
-    paddingHorizontal: 12,
-    fontSize: 14,
-    color: theme.colors.neutral[80],
-  },
-  eyeIcon: {
-    padding: 8,
-  },
-  buttonContainer: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  button: {
-    flex: 1,
-    paddingVertical: 12,
-    borderRadius: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  cancelButton: {
-    borderWidth: 1,
-    borderColor: theme.colors.neutral[30],
-  },
-  cancelButtonText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: theme.colors.neutral[70],
-  },
-  submitButton: {
-    backgroundColor: theme.colors.primary[70],
-  },
-  submitButtonDisabled: {
-    backgroundColor: theme.colors.neutral[30],
-  },
-  submitButtonText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: 'white',
-  },
-})
+function makeStyles(c: Colors) {
+  return StyleSheet.create({
+    overlay: {
+      flex: 1,
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    container: {
+      backgroundColor: c.neutral[0],
+      borderRadius: 12,
+      padding: 20,
+      width: '85%',
+      maxWidth: 400,
+      gap: 16,
+    },
+    header: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    },
+    title: {
+      fontSize: 18,
+      fontWeight: '600',
+      color: c.neutral[90],
+    },
+    description: {
+      fontSize: 14,
+      color: c.neutral[70],
+      lineHeight: 20,
+    },
+    inputContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      borderWidth: 1,
+      borderColor: c.neutral[30],
+      borderRadius: 8,
+      paddingRight: 12,
+    },
+    input: {
+      flex: 1,
+      paddingVertical: 12,
+      paddingHorizontal: 12,
+      fontSize: 14,
+      color: c.neutral[80],
+    },
+    eyeIcon: {
+      padding: 8,
+    },
+    buttonContainer: {
+      flexDirection: 'row',
+      gap: 12,
+    },
+    button: {
+      flex: 1,
+      paddingVertical: 12,
+      borderRadius: 8,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    cancelButton: {
+      borderWidth: 1,
+      borderColor: c.neutral[30],
+    },
+    cancelButtonText: {
+      fontSize: 14,
+      fontWeight: '600',
+      color: c.neutral[70],
+    },
+    submitButton: {
+      backgroundColor: c.primary[70],
+    },
+    submitButtonDisabled: {
+      backgroundColor: c.neutral[30],
+    },
+    submitButtonText: {
+      fontSize: 14,
+      fontWeight: '600',
+      color: 'white',
+    },
+  })
+}

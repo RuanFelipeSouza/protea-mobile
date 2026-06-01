@@ -1,27 +1,25 @@
 import type { Patient } from '../types/patient';
-import { api } from './apiClient';
+import { api, proteaApi } from './apiClient';
 
 type PacienteResponse = {
   id: number;
   nome: string;
-  datanasc: string;
+  datanascimento?: string;
   imagem_url?: string;
   is_active?: boolean;
   cpf?: string;
-  nomemae?: string;
-  sexo?: { sexo: string };
+  nomeresponsavel?: string;
 };
 
 function toPatient(p: PacienteResponse): Patient {
   return {
     id: String(p.id),
     nome: p.nome,
-    datanasc: p.datanasc ?? null,
+    datanascimento: p.datanascimento ?? null,
     avatarUrl: p.imagem_url,
     is_active: p.is_active ?? true,
     cpf: p.cpf,
-    nomemae: p.nomemae,
-    sexo: p.sexo?.sexo,
+    nomeresponsavel: p.nomeresponsavel,
   };
 }
 
@@ -47,7 +45,7 @@ export const patientService = {
     is_active?: boolean,
     signal?: AbortSignal,
   ): Promise<Patient[]> {
-    const { data } = await api.get<PacienteResponse[]>(`mobile/unidade/${unidadeId}/paciente`, {
+    const { data } = await proteaApi.get<PacienteResponse[]>(`mobile/unidade/${unidadeId}/paciente`, {
       params: {
         ...(is_active !== undefined && { is_active }),
       },

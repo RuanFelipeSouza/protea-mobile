@@ -37,10 +37,12 @@ export const colors = {
     100: '#000000',
   },
   warning: {
+    10: '#FFF3E0',
     40: '#FFA726',
     60: '#FB8C00',
   },
   error: {
+    10: '#FFEBEE',
     40: '#EF5350',
     60: '#E53935',
     100: '#D32F2F',

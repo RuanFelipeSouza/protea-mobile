@@ -1,6 +1,8 @@
+import { useMemo } from 'react'
 import { View, Text, Pressable } from 'react-native'
 import { AlertItem } from '../../molecules'
-import { styles } from './styles'
+import { useTheme } from '../../../theme'
+import { makeStyles } from './styles'
 
 type Alert = {
   message: string
@@ -13,6 +15,9 @@ type AlertsSectionProps = {
 }
 
 export function AlertsSection({ alerts, onVerTodos }: AlertsSectionProps) {
+  const { colors } = useTheme()
+  const styles = useMemo(() => makeStyles(colors), [colors])
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Alertas</Text>

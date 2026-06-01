@@ -1,5 +1,7 @@
+import { useMemo } from 'react'
 import { View, Text, Pressable } from 'react-native'
-import { styles } from './styles'
+import { useTheme } from '../../../theme'
+import { makeStyles } from './styles'
 
 type Tab = {
   label: string
@@ -13,6 +15,9 @@ type SegmentedControlProps = {
 }
 
 export function SegmentedControl({ tabs, active, onChange }: SegmentedControlProps) {
+  const { colors } = useTheme()
+  const styles = useMemo(() => makeStyles(colors), [colors])
+
   return (
     <View style={styles.container}>
       {tabs.map((tab) => {

@@ -1,7 +1,8 @@
+import { useMemo } from 'react'
 import { View, Text } from 'react-native'
 import { Icon } from '../../atoms'
-import { theme } from '../../../theme'
-import { styles } from './styles'
+import { useTheme } from '../../../theme'
+import { makeStyles } from './styles'
 
 type AlertItemProps = {
   message: string
@@ -9,9 +10,12 @@ type AlertItemProps = {
 }
 
 export function AlertItem({ message, time }: AlertItemProps) {
+  const { colors } = useTheme()
+  const styles = useMemo(() => makeStyles(colors), [colors])
+
   return (
     <View style={styles.container}>
-      <Icon name="warning" size={20} color={theme.colors.warning[40]} />
+      <Icon name="warning" size={20} color={colors.warning[40]} />
       <Text style={styles.message}>{message}</Text>
       <Text style={styles.time}>{time}</Text>
     </View>

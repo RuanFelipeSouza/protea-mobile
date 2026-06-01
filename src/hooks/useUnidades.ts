@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { unidadeService } from '../services/unidadeService'
+import { mobileService } from '../services/mobileService'
 import { useAuthStore } from '../stores/authStore'
 import type { Unidade } from '../types/unidade'
 
@@ -16,7 +16,7 @@ type State = {
  * Só dispara o request quando há um usuário autenticado.
  */
 export function useUnidades() {
-  const usuario = useAuthStore((s) => s.usuario)
+  const token = useAuthStore((s) => s.token)
   const [state, setState] = useState<State>({
     unidades: [],
     loading: false,
@@ -24,7 +24,7 @@ export function useUnidades() {
   })
 
   useEffect(() => {
-    if (!usuario?.id) {
+    if (!token) {
       setState({ unidades: [], loading: false, erro: null })
       return
     }
@@ -32,19 +32,19 @@ export function useUnidades() {
     setState((s) => ({ ...s, loading: true, erro: null }))
     const controller = new AbortController()
 
-    unidadeService
-      .listarPorUsuario(usuario.id, controller.signal)
-      .then((unidades) => {
+    mobileService
+      .getMinhasUnidades(controller.signal)
+      .then((unidades: Unidade[]) => {
         setState({ unidades, loading: false, erro: null })
       })
-      .catch((err) => {
+      .catch((err: { code?: string; message?: string }) => {
         if (err?.code === 'ERR_CANCELED') return
         console.error('[useUnidades] erro:', err?.message)
         setState({ unidades: [], loading: false, erro: 'Erro ao carregar unidades' })
       })
 
     return () => controller.abort()
-  }, [usuario?.id])
+  }, [token])
 
   return state
 }

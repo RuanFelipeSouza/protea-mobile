@@ -1,5 +1,5 @@
 import { useLocalSearchParams } from 'expo-router'
-import { EvolucaoDetalhesPage } from '../../../src/components/pages'
+import { EvolucaoDetalhesPage } from '../../../../src/components/pages'
 
 export default function EvolucaoDetalhesScreen() {
   const { evolucao_id } = useLocalSearchParams<{ evolucao_id: string }>()

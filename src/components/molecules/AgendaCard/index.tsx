@@ -1,14 +1,23 @@
+import { useMemo } from 'react'
 import { View, Text, Pressable } from 'react-native'
-import { theme } from '../../../theme'
+import { useTheme } from '../../../theme'
 import type { AgendaItem } from '../../../types/agenda'
-import { styles } from './styles'
+import { makeStyles } from './styles'
 
-export function getStatusStyle(status: string): { color: string; bg: string } {
+export function getStatusStyle(
+  status: string,
+  colors: {
+    success: Record<60, string>
+    warning: Record<10 | 60, string>
+    error: Record<10 | 40, string>
+    primary: Record<10 | 70, string>
+  },
+): { color: string; bg: string } {
   const s = status.toLowerCase()
-  if (s.includes('atendido')) return { color: theme.colors.success[60], bg: '#E8F5E9' }
-  if (s.includes('falta')) return { color: theme.colors.warning[60], bg: '#FFF3E0' }
-  if (s.includes('cancelado')) return { color: theme.colors.error[40], bg: '#FFEBEE' }
-  return { color: theme.colors.primary[70], bg: theme.colors.primary[10] }
+  if (s.includes('atendido')) return { color: colors.success[60],  bg: colors.primary[10] }
+  if (s.includes('falta'))    return { color: colors.warning[60],  bg: colors.warning[10] }
+  if (s.includes('cancelado')) return { color: colors.error[40],   bg: colors.error[10] }
+  return { color: colors.primary[70], bg: colors.primary[10] }
 }
 
 type Props = {
@@ -17,7 +26,9 @@ type Props = {
 }
 
 export function AgendaCard({ item, onPress }: Props) {
-  const statusStyle = getStatusStyle(item.status)
+  const { colors } = useTheme()
+  const styles = useMemo(() => makeStyles(colors), [colors])
+  const statusStyle = getStatusStyle(item.status, colors as any)
   const Container = onPress ? Pressable : View
 
   return (
@@ -25,7 +36,7 @@ export function AgendaCard({ item, onPress }: Props) {
       onPress={onPress}
       style={[
         styles.container,
-        { borderLeftColor: item.cor || theme.colors.primary[60] },
+        { borderLeftColor: item.cor || colors.primary[60] },
       ]}
     >
       <Text style={styles.hora}>{item.hora}</Text>

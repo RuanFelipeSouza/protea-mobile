@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
@@ -13,9 +14,13 @@ import {
 import { usePacientes } from '../../../hooks/usePacientes';
 import type { TaskState } from '../../../services/relatorioService';
 import { relatorioService } from '../../../services/relatorioService';
-import { theme } from '../../../theme';
+import { useTheme } from '../../../theme';
+import type { darkColors } from '../../../theme/dark'
+import type { colors as lightColors } from '../../../theme/colors'
 import type { Patient } from '../../../types/patient';
 import { HeaderBar, UnidadeRequired } from '../../organisms';
+
+type Colors = typeof lightColors | typeof darkColors
 
 function maskData(raw: string): string {
   const digits = raw.replace(/\D/g, '').slice(0, 8);
@@ -30,6 +35,8 @@ type GeracaoState = 'idle' | 'gerando' | 'pronto' | 'erro';
 
 export function RelatoriosPage() {
   const router = useRouter();
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const [searchQuery, setSearchQuery] = useState('');
   const [pacienteSelecionado, setPacienteSelecionado] = useState<Patient | null>(null);
   const [dataInicio, setDataInicio] = useState('');
@@ -152,16 +159,16 @@ export function RelatoriosPage() {
           {!pacienteSelecionado ? (
             <>
               <View style={styles.searchBox}>
-                <Ionicons name="search-outline" size={16} color={theme.colors.neutral[50]} />
+                <Ionicons name="search-outline" size={16} color={colors.neutral[50]} />
                 <TextInput
                   style={styles.searchInput}
                   value={searchQuery}
                   onChangeText={setSearchQuery}
                   placeholder="Buscar paciente..."
-                  placeholderTextColor={theme.colors.neutral[50]}
+                  placeholderTextColor={colors.neutral[50]}
                 />
                 {loadingBusca && (
-                  <ActivityIndicator size="small" color={theme.colors.primary[60]} />
+                  <ActivityIndicator size="small" color={colors.primary[60]} />
                 )}
               </View>
 
@@ -189,10 +196,10 @@ export function RelatoriosPage() {
             </>
           ) : (
             <View style={styles.pacienteBadge}>
-              <Ionicons name="person" size={16} color={theme.colors.primary[70]} />
+              <Ionicons name="person" size={16} color={colors.primary[70]} />
               <Text style={styles.pacienteBadgeNome}>{pacienteSelecionado.nome}</Text>
               <Pressable onPress={handleLimparPaciente} hitSlop={8}>
-                <Ionicons name="close-circle" size={18} color={theme.colors.neutral[50]} />
+                <Ionicons name="close-circle" size={18} color={colors.neutral[50]} />
               </Pressable>
             </View>
           )}
@@ -207,7 +214,7 @@ export function RelatoriosPage() {
                 value={dataInicio}
                 onChangeText={(v) => setDataInicio(maskData(v))}
                 placeholder="AAAA-MM-DD"
-                placeholderTextColor={theme.colors.neutral[40]}
+                placeholderTextColor={colors.neutral[40]}
                 keyboardType="numeric"
                 maxLength={10}
               />
@@ -219,7 +226,7 @@ export function RelatoriosPage() {
                 value={dataFim}
                 onChangeText={(v) => setDataFim(maskData(v))}
                 placeholder="AAAA-MM-DD"
-                placeholderTextColor={theme.colors.neutral[40]}
+                placeholderTextColor={colors.neutral[40]}
                 keyboardType="numeric"
                 maxLength={10}
               />
@@ -231,13 +238,13 @@ export function RelatoriosPage() {
             onPress={handleGerar}
             disabled={!podeGerar}
           >
-            <Ionicons name="document-text-outline" size={18} color={theme.colors.neutral[0]} />
+            <Ionicons name="document-text-outline" size={18} color={colors.neutral[0]} />
             <Text style={styles.gerarBtnText}>Gerar Relatório</Text>
           </Pressable>
 
           {geracaoState === 'gerando' && (
             <View style={styles.statusBox}>
-              <ActivityIndicator size="small" color={theme.colors.primary[70]} />
+              <ActivityIndicator size="small" color={colors.primary[70]} />
               <View style={styles.statusTextBlock}>
                 <Text style={styles.statusTitle}>Gerando PDF...</Text>
                 <Text style={styles.statusSub}>
@@ -253,7 +260,7 @@ export function RelatoriosPage() {
 
           {geracaoState === 'pronto' && (
             <View style={styles.statusBox}>
-              <Ionicons name="checkmark-circle" size={28} color={theme.colors.success[60]} />
+              <Ionicons name="checkmark-circle" size={28} color={colors.success[60]} />
               <View style={styles.statusTextBlock}>
                 <Text style={styles.statusTitle}>PDF pronto!</Text>
                 {USE_MOCK && (
@@ -270,9 +277,9 @@ export function RelatoriosPage() {
 
           {geracaoState === 'erro' && (
             <View style={styles.statusBox}>
-              <Ionicons name="alert-circle" size={28} color={theme.colors.error[40]} />
+              <Ionicons name="alert-circle" size={28} color={colors.error[40]} />
               <View style={styles.statusTextBlock}>
-                <Text style={[styles.statusTitle, { color: theme.colors.error[40] }]}>Erro</Text>
+                <Text style={[styles.statusTitle, { color: colors.error[40] }]}>Erro</Text>
                 <Text style={styles.statusSub}>{erroMsg}</Text>
               </View>
               <Pressable
@@ -298,163 +305,165 @@ export function RelatoriosPage() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: theme.colors.neutral[10],
-  },
-  scroll: {
-    padding: 16,
-    gap: 8,
-  },
-  sectionLabel: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: theme.colors.neutral[60],
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-    marginBottom: 6,
-  },
-  searchBox: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: theme.colors.neutral[0],
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    gap: 8,
-    borderWidth: 1,
-    borderColor: theme.colors.neutral[20],
-  },
-  searchInput: {
-    flex: 1,
-    fontSize: 15,
-    color: theme.colors.neutral[90],
-  },
-  sugestoes: {
-    backgroundColor: theme.colors.neutral[0],
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: theme.colors.neutral[20],
-    overflow: 'hidden',
-    marginTop: 4,
-  },
-  sugestaoItem: {
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.neutral[20],
-  },
-  sugestaoNome: {
-    fontSize: 14,
-    color: theme.colors.neutral[90],
-  },
-  hintText: {
-    fontSize: 13,
-    color: theme.colors.neutral[50],
-    marginTop: 4,
-    marginLeft: 4,
-  },
-  pacienteBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: theme.colors.primary[10],
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    gap: 8,
-    borderWidth: 1,
-    borderColor: theme.colors.primary[30],
-  },
-  pacienteBadgeNome: {
-    flex: 1,
-    fontSize: 15,
-    fontWeight: '500',
-    color: theme.colors.primary[90],
-  },
-  dateRow: {
-    flexDirection: 'row',
-    gap: 10,
-  },
-  dateField: {
-    flex: 1,
-    gap: 4,
-  },
-  dateLabel: {
-    fontSize: 12,
-    color: theme.colors.neutral[60],
-  },
-  dateInput: {
-    backgroundColor: theme.colors.neutral[0],
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    paddingVertical: 9,
-    fontSize: 14,
-    color: theme.colors.neutral[90],
-    borderWidth: 1,
-    borderColor: theme.colors.neutral[20],
-  },
-  gerarBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    backgroundColor: theme.colors.primary[70],
-    borderRadius: 10,
-    paddingVertical: 14,
-    marginTop: 8,
-  },
-  gerarBtnDisabled: {
-    backgroundColor: theme.colors.neutral[30],
-  },
-  gerarBtnText: {
-    color: theme.colors.neutral[0],
-    fontSize: 15,
-    fontWeight: '600',
-  },
-  statusBox: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: theme.colors.neutral[0],
-    borderRadius: 10,
-    padding: 14,
-    gap: 12,
-    marginTop: 16,
-    borderWidth: 1,
-    borderColor: theme.colors.neutral[20],
-  },
-  statusTextBlock: {
-    flex: 1,
-    gap: 2,
-  },
-  statusTitle: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: theme.colors.neutral[90],
-  },
-  statusSub: {
-    fontSize: 12,
-    color: theme.colors.neutral[60],
-  },
-  statusHint: {
-    fontSize: 11,
-    color: theme.colors.neutral[50],
-    marginTop: 2,
-  },
-  abrirBtn: {
-    backgroundColor: theme.colors.primary[70],
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 7,
-  },
-  abrirBtnText: {
-    color: theme.colors.neutral[0],
-    fontSize: 13,
-    fontWeight: '600',
-  },
-  erroInline: {
-    fontSize: 12,
-    color: theme.colors.error[40],
-    marginTop: 4,
-  },
-});
+function makeStyles(c: Colors) {
+  return StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: c.neutral[10],
+    },
+    scroll: {
+      padding: 16,
+      gap: 8,
+    },
+    sectionLabel: {
+      fontSize: 13,
+      fontWeight: '600',
+      color: c.neutral[60],
+      textTransform: 'uppercase',
+      letterSpacing: 0.5,
+      marginBottom: 6,
+    },
+    searchBox: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: c.neutral[0],
+      borderRadius: 10,
+      paddingHorizontal: 12,
+      paddingVertical: 10,
+      gap: 8,
+      borderWidth: 1,
+      borderColor: c.neutral[20],
+    },
+    searchInput: {
+      flex: 1,
+      fontSize: 15,
+      color: c.neutral[90],
+    },
+    sugestoes: {
+      backgroundColor: c.neutral[0],
+      borderRadius: 10,
+      borderWidth: 1,
+      borderColor: c.neutral[20],
+      overflow: 'hidden',
+      marginTop: 4,
+    },
+    sugestaoItem: {
+      paddingHorizontal: 14,
+      paddingVertical: 12,
+      borderBottomWidth: 1,
+      borderBottomColor: c.neutral[20],
+    },
+    sugestaoNome: {
+      fontSize: 14,
+      color: c.neutral[90],
+    },
+    hintText: {
+      fontSize: 13,
+      color: c.neutral[50],
+      marginTop: 4,
+      marginLeft: 4,
+    },
+    pacienteBadge: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: c.primary[10],
+      borderRadius: 10,
+      paddingHorizontal: 12,
+      paddingVertical: 10,
+      gap: 8,
+      borderWidth: 1,
+      borderColor: c.primary[30],
+    },
+    pacienteBadgeNome: {
+      flex: 1,
+      fontSize: 15,
+      fontWeight: '500',
+      color: c.primary[90],
+    },
+    dateRow: {
+      flexDirection: 'row',
+      gap: 10,
+    },
+    dateField: {
+      flex: 1,
+      gap: 4,
+    },
+    dateLabel: {
+      fontSize: 12,
+      color: c.neutral[60],
+    },
+    dateInput: {
+      backgroundColor: c.neutral[0],
+      borderRadius: 8,
+      paddingHorizontal: 10,
+      paddingVertical: 9,
+      fontSize: 14,
+      color: c.neutral[90],
+      borderWidth: 1,
+      borderColor: c.neutral[20],
+    },
+    gerarBtn: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 8,
+      backgroundColor: c.primary[70],
+      borderRadius: 10,
+      paddingVertical: 14,
+      marginTop: 8,
+    },
+    gerarBtnDisabled: {
+      backgroundColor: c.neutral[30],
+    },
+    gerarBtnText: {
+      color: c.neutral[0],
+      fontSize: 15,
+      fontWeight: '600',
+    },
+    statusBox: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: c.neutral[0],
+      borderRadius: 10,
+      padding: 14,
+      gap: 12,
+      marginTop: 16,
+      borderWidth: 1,
+      borderColor: c.neutral[20],
+    },
+    statusTextBlock: {
+      flex: 1,
+      gap: 2,
+    },
+    statusTitle: {
+      fontSize: 14,
+      fontWeight: '600',
+      color: c.neutral[90],
+    },
+    statusSub: {
+      fontSize: 12,
+      color: c.neutral[60],
+    },
+    statusHint: {
+      fontSize: 11,
+      color: c.neutral[50],
+      marginTop: 2,
+    },
+    abrirBtn: {
+      backgroundColor: c.primary[70],
+      borderRadius: 8,
+      paddingHorizontal: 12,
+      paddingVertical: 7,
+    },
+    abrirBtnText: {
+      color: c.neutral[0],
+      fontSize: 13,
+      fontWeight: '600',
+    },
+    erroInline: {
+      fontSize: 12,
+      color: c.error[40],
+      marginTop: 4,
+    },
+  });
+}

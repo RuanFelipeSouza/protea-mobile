@@ -1,7 +1,8 @@
+import { useMemo } from 'react'
 import { View, TextInput } from 'react-native'
 import { Icon } from '../../atoms'
-import { theme } from '../../../theme'
-import { styles } from './styles'
+import { useTheme } from '../../../theme'
+import { makeStyles } from './styles'
 
 type SearchInputProps = {
   value: string
@@ -10,15 +11,18 @@ type SearchInputProps = {
 }
 
 export function SearchInput({ value, onChange, placeholder = 'Buscar...' }: SearchInputProps) {
+  const { colors } = useTheme()
+  const styles = useMemo(() => makeStyles(colors), [colors])
+
   return (
     <View style={styles.container}>
-      <Icon name="search-outline" size={18} color={theme.colors.neutral[50]} />
+      <Icon name="search-outline" size={18} color={colors.neutral[50]} />
       <TextInput
         style={styles.input}
         value={value}
         onChangeText={onChange}
         placeholder={placeholder}
-        placeholderTextColor={theme.colors.neutral[50]}
+        placeholderTextColor={colors.neutral[50]}
       />
     </View>
   )

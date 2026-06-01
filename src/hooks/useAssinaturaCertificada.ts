@@ -41,6 +41,7 @@ export function useAssinaturaCertificada() {
     try {
       setState((prev) => ({ ...prev, loading: true, erro: null }))
       const info = await assinaturaService.getCertificadoInfo()
+      console.log('[assinatura] cpfCertificado response:', JSON.stringify(info))
       setState((prev) => ({
         ...prev,
         cpf: info.cpf,
@@ -86,25 +87,29 @@ export function useAssinaturaCertificada() {
 
       const fileBase64 = await obterFileBase64(evolucao)
 
+
       const tokenResp = await assinaturaService.autenticarCertificado(
         senha,
         state.cpf
       )
+      console.log('[assinatura] autenticarCertificado:', JSON.stringify(tokenResp))
 
       const aliasResp = await assinaturaService.buscarCertificadoAlias(
         tokenResp.access_token
       )
+      console.log('[assinatura] buscarCertificadoAlias:', JSON.stringify(aliasResp))
 
       const signResp = await assinaturaService.assinarDocumento(
         tokenResp.access_token,
-        aliasResp.certificates[0].alias,
+        aliasResp[0].alias,
         fileBase64
       )
+      console.log('[assinatura] assinarDocumento:', JSON.stringify(signResp))
 
       const dadosAssinatura = {
         tcn: signResp.tcn,
         documento_fk: evolucao.document_id,
-        result: signResp.documents[0].result,
+        result: signResp.result,
       }
 
       await assinaturaService.salvarDadosAssinatura(dadosAssinatura)

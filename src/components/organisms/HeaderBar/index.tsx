@@ -5,8 +5,8 @@ import { Icon } from '../../atoms'
 import { Dropdown } from '../../molecules'
 import { useUnidades } from '../../../hooks/useUnidades'
 import { useUnidadeStore } from '../../../stores/unidadeStore'
-import { theme } from '../../../theme'
-import { styles } from './styles'
+import { useTheme } from '../../../theme'
+import { makeStyles } from './styles'
 
 type HeaderBarProps = {
   title: string
@@ -35,6 +35,9 @@ export function HeaderBar({
   const setSelecionada = useUnidadeStore((s) => s.setSelecionada)
   const [modalOpen, setModalOpen] = useState(false)
 
+  const { colors } = useTheme()
+  const styles = useMemo(() => makeStyles(colors), [colors])
+
   const options = useMemo(
     () => unidades.map((u) => ({ label: u.unidade, value: u.id })),
     [unidades],
@@ -54,7 +57,7 @@ export function HeaderBar({
       <View style={styles.side}>
         {showBack && (
           <Pressable onPress={onBack} hitSlop={8}>
-            <Icon name="chevron-back" size={24} color={theme.colors.primary[70]} />
+            <Icon name="chevron-back" size={24} color={colors.primary[70]} />
           </Pressable>
         )}
       </View>
@@ -83,12 +86,12 @@ export function HeaderBar({
               </Text>
               {!lockUnidade && (
                 loading ? (
-                  <ActivityIndicator size="small" color={theme.colors.primary[60]} />
+                  <ActivityIndicator size="small" color={colors.primary[60]} />
                 ) : (
                   <Icon
                     name="chevron-down"
                     size={16}
-                    color={hasSelection ? theme.colors.neutral[70] : theme.colors.neutral[60]}
+                    color={hasSelection ? colors.neutral[70] : colors.neutral[60]}
                   />
                 )
               )}
@@ -105,7 +108,7 @@ export function HeaderBar({
       <View style={styles.profileSide}>
         {showProfile && (
           <Pressable onPress={onProfile} hitSlop={8}>
-            <Icon name="person-circle-outline" size={28} color={theme.colors.primary[70]} />
+            <Icon name="person-circle-outline" size={28} color={colors.primary[70]} />
           </Pressable>
         )}
       </View>

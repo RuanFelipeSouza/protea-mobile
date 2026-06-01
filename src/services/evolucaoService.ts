@@ -4,6 +4,7 @@ import type { Acompanhamento } from '../types/acompanhamento'
 import type { DocumentoEvolucao } from '../types/documento'
 import type { EvolucaoPendente, EvolucaoAPI, EvolucaoStatusType, Pendencia } from '../types/evolucaoPendente'
 import type { EvolucaoDetalhes } from '../types/mobile'
+import type { PerfilPaciente } from '../types/perfilPaciente'
 
 export const evolucaoService = {
   async getEvolucaoDetalhes(evolucaoId: number): Promise<EvolucaoDetalhes> {
@@ -61,6 +62,11 @@ export const evolucaoService = {
       pacienteid: item.paciente_id,
       status: item.pendente ? 'pendente' : ('realizada' as EvolucaoStatusType),
     }))
+  },
+
+  async getPerfilPaciente(pacienteId: string | number): Promise<PerfilPaciente> {
+    const { data } = await proteaApi.get<PerfilPaciente>(`mobile/paciente/${pacienteId}/perfil`)
+    return data
   },
 
   async getPendencias(unidadeId: number, page = 1): Promise<Pendencia[]> {
