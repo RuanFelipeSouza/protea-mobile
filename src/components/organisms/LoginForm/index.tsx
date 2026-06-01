@@ -1,18 +1,30 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { View, Text, Pressable } from 'react-native'
 import { InputField } from '../../molecules/InputField'
 import { Button } from '../../molecules/Button'
 import { Icon } from '../../atoms'
-import { theme } from '../../../theme'
-import { styles } from './styles'
+import { useTheme } from '../../../theme'
+import { makeStyles } from './styles'
+
+type LoginMode = 'prof' | 'paciente'
 
 type LoginFormProps = {
   onLogin: (usuario: string, senha: string) => Promise<void>
   onForgotPassword?: () => void
-  onParentArea?: () => void
+  onModeChange?: (mode: LoginMode) => void
+  onPrimeiroAcesso?: () => void
+  mode?: LoginMode
 }
 
-export function LoginForm({ onLogin, onForgotPassword, onParentArea }: LoginFormProps) {
+export function LoginForm({
+  onLogin,
+  onForgotPassword,
+  onModeChange,
+  onPrimeiroAcesso,
+  mode = 'prof',
+}: LoginFormProps) {
+  const { colors } = useTheme()
+  const styles = useMemo(() => makeStyles(colors), [colors])
   const [usuario, setUsuario] = useState('')
   const [senha, setSenha] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -56,7 +68,7 @@ export function LoginForm({ onLogin, onForgotPassword, onParentArea }: LoginForm
               <Icon
                 name={showPassword ? 'eye-off-outline' : 'eye-outline'}
                 size={20}
-                color={theme.colors.neutral[50]}
+                color={colors.neutral[50]}
               />
             </Pressable>
           }
@@ -69,7 +81,13 @@ export function LoginForm({ onLogin, onForgotPassword, onParentArea }: LoginForm
 
       <View style={styles.buttons}>
         <Button label={loading ? 'Entrando...' : 'Entrar'} onPress={handleLogin} disabled={loading} />
-        <Button label="Área dos Pais" onPress={onParentArea ?? (() => {})} variant="ghost" />
+
+        {mode === 'paciente' && (
+          <Pressable onPress={onPrimeiroAcesso} style={styles.primeiroAcessoRow} hitSlop={8}>
+            <Text style={styles.primeiroAcessoLabel}>Primeiro acesso?</Text>
+            <Text style={styles.primeiroAcessoLink}>Criar minha senha</Text>
+          </Pressable>
+        )}
       </View>
     </View>
   )
