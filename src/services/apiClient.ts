@@ -37,6 +37,16 @@ function createApiInstance(baseURL: string, extraHeaders: Record<string, string>
         : (raw ?? error.message);
 
       console.error(`[API] ✗ ${status ?? 'SEM_RESPOSTA'} ${url}`, message);
+      console.error('[API] DEBUG:', JSON.stringify({
+        code: error.code,
+        message: error.message,
+        baseURL: error.config?.baseURL,
+        fullUrl: (error.config?.baseURL ?? '') + (error.config?.url ?? ''),
+        method: error.config?.method,
+        headers: error.config?.headers,
+        timeout: error.config?.timeout,
+        hasResponse: !!error.response,
+      }));
 
       if (status === 401) {
         await removeToken();
