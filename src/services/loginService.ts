@@ -1,4 +1,4 @@
-import { api, HOST_PROTEA } from './apiClient'
+import { api } from './apiClient'
 
 const PROTEA_KEY = process.env.EXPO_PUBLIC_PROTEA_KEY ?? ''
 const USE_MOCK = process.env.EXPO_PUBLIC_USE_MOCK === 'true'
@@ -45,7 +45,6 @@ export async function loginRequest(usuario: string, senha: string): Promise<Logi
         'Content-Type': 'application/json',
         Accept: 'application/json',
         proteakey: PROTEA_KEY,
-        ...HOST_PROTEA,
       },
     },
   )
