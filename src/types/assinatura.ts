@@ -1,23 +1,10 @@
-export type DadosAssinados = {
-  tcn: string
-  documento_fk: number
-  result: string
-}
-
 export type CertificadoInfo = {
-  id: number
   cpf: string
   habilitar: boolean
 }
 
-export type CertificadoAlias = {
-  alias: string
-  subjectDN: string
-}
-
-export type AssinarDocumentoResponse = {
-  tcn: string
-  result: string
-}
+export type AssinarResponse =
+  | { success: true; storage_url: string }
+  | { success: false; erro: string }
 
 export type StatusAssinatura = 'pendente' | 'assinado' | 'erro'

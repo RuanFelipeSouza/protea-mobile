@@ -10,7 +10,7 @@ export const evolucaoService = {
   async getEvolucaoDetalhes(evolucaoId: number): Promise<EvolucaoDetalhes> {
     console.log('[evolucaoService] 🔄 getEvolucaoDetalhes chamado com ID:', evolucaoId)
     try {
-      const endpoint = `mobile/evolucoes/${evolucaoId}`
+      const endpoint = `mobile/prestador/evolucao/${evolucaoId}`
       console.log('[evolucaoService] 📡 Requisição para:', endpoint)
       const { data } = await proteaApi.get<EvolucaoDetalhes>(endpoint)
       console.log('[evolucaoService] ✅ Resposta recebida:', data)
@@ -48,7 +48,7 @@ export const evolucaoService = {
       next?: string | null
       previous?: string | null
       results: EvolucaoAPI[]
-    }>(`mobile/unidade/${unidadeId}/evolucoes?page=${page}`)
+    }>(`mobile/prestador/unidade/${unidadeId}/evolucoes?page=${page}`)
 
     return data.results.map((item) => ({
       id: item.id,
@@ -65,7 +65,7 @@ export const evolucaoService = {
   },
 
   async getPerfilPaciente(pacienteId: string | number): Promise<PerfilPaciente> {
-    const { data } = await proteaApi.get<PerfilPaciente>(`mobile/paciente/${pacienteId}/perfil`)
+    const { data } = await proteaApi.get<PerfilPaciente>(`mobile/prestador/paciente/${pacienteId}/perfil`)
     return data
   },
 
@@ -75,7 +75,7 @@ export const evolucaoService = {
       next?: string | null
       previous?: string | null
       results: Pendencia[]
-    }>(`mobile/unidade/${unidadeId}/pendencias?page=${page}`)
+    }>(`mobile/prestador/unidade/${unidadeId}/pendencias?page=${page}`)
 
     return data.results
   },

@@ -45,7 +45,7 @@ export const patientService = {
     is_active?: boolean,
     signal?: AbortSignal,
   ): Promise<Patient[]> {
-    const { data } = await proteaApi.get<PacienteResponse[]>(`mobile/unidade/${unidadeId}/paciente`, {
+    const { data } = await proteaApi.get<PacienteResponse[]>(`mobile/prestador/unidade/${unidadeId}/pacientes`, {
       params: {
         ...(is_active !== undefined && { is_active }),
       },

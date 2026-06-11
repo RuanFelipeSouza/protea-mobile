@@ -2,7 +2,6 @@ import axios from 'axios'
 import { getPatientToken, removePatientToken } from './pacienteAuthService'
 import { usePacienteAuthStore } from '../stores/pacienteAuthStore'
 import type {
-  AgendamentoStatus,
   AgendamentoPaciente,
   EvolucaoPaciente,
   EvolucaoPacienteDetalhe,
@@ -166,69 +165,11 @@ const MOCK_PERFIL: PerfilPacienteContexto = {
   telefone: '(27)99661795',
 }
 
-// ─── Date helpers ─────────────────────────────────────────────────────────────
-
-const DIAS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb']
-
-function isoToDMY(iso: string): string {
-  const [y, m, d] = iso.split('-')
-  return `${d}/${m}/${y}`
-}
-
-function diaSemanaOf(iso: string): string {
-  const [y, m, d] = iso.split('-').map(Number)
-  return DIAS[new Date(y, m - 1, d).getDay()] ?? ''
-}
-
-function mapStatus(s: string | null | undefined): AgendamentoStatus {
-  const slug = (s ?? '').toLowerCase()
-  if (slug.includes('realizado') || slug.includes('atendido')) return 'realizado'
-  if (slug.includes('falta') || slug.includes('ausente')) return 'falta'
-  if (slug.includes('confirmado')) return 'confirmado'
-  return 'agendado'
-}
-
-function mapAgendamento(raw: any): AgendamentoPaciente {
-  const today = new Date()
-  const dataISO: string = raw.data ?? ''
-  const [y, m, d] = dataISO.split('-').map(Number)
-  const isPassado = dataISO ? new Date(y, m - 1, d) < today : false
-  return {
-    id: raw.id,
-    data: dataISO ? isoToDMY(dataISO) : '',
-    diaSemana: dataISO ? diaSemanaOf(dataISO) : '',
-    hora: raw.hora ?? '',
-    modalidade: raw.modalidade ?? raw['especialidade__especialidade'] ?? '',
-    profissional: raw['profissional__nome'] ?? '',
-    local: raw['unidadeId__unidade'] ?? null,
-    status: mapStatus(raw['status__status']),
-    _isPassado: isPassado,
-  } as any
-}
-
-function toArray(data: unknown): any[] {
-  if (Array.isArray(data)) return data
-  if (data && typeof data === 'object') {
-    const d = data as Record<string, unknown>
-    if (Array.isArray(d.results)) return d.results
-    if (Array.isArray(d.atendimentos)) return d.atendimentos
-    if (Array.isArray(d.evolucoes)) return d.evolucoes
-  }
-  return []
-}
-
-function mapEvolucao(raw: any): EvolucaoPaciente {
-  return {
-    id: raw.id,
-    tipo: raw['tipoevolucao__tipo'] ?? 'Atendimento',
-    modalidade: raw['unidade__unidade'] ?? '',
-    profissional: raw['profissional__nome'] ?? '',
-    data: raw.data ? isoToDMY(raw.data) : '',
-    hora: raw.hora ?? '',
-  }
-}
-
 // ─── Service functions ────────────────────────────────────────────────────────
+//
+// O backend (mobile.paciente) já devolve DTOs prontos para a UI — datas em
+// DD/MM/YYYY, status normalizado e a separação futuros/passados. Não há mais
+// remapeamento de campos crus aqui; consumimos a resposta diretamente.
 
 export async function getPacienteAgendamentos(): Promise<{
   futuros: AgendamentoPaciente[]
@@ -239,18 +180,15 @@ export async function getPacienteAgendamentos(): Promise<{
     return { futuros: MOCK_AGENDAMENTOS_FUTUROS, passados: MOCK_AGENDAMENTOS_PASSADOS }
   }
 
-  const { data } = await pacienteApi.get('/mobile/paciente/meus-atendimentos')
-  const mapped = toArray(data).map(mapAgendamento)
-  const today = new Date(); today.setHours(0, 0, 0, 0)
-  const futuros = mapped.filter((a) => {
-    const [d, m, y] = (a.data as string).split('/').map(Number)
-    return new Date(y, m - 1, d) >= today
-  })
-  const passados = mapped.filter((a) => {
-    const [d, m, y] = (a.data as string).split('/').map(Number)
-    return new Date(y, m - 1, d) < today
-  })
-  return { futuros, passados }
+  const { data } = await pacienteApi.get<{
+    futuros: AgendamentoPaciente[]
+    passados: AgendamentoPaciente[]
+  }>('/mobile/paciente/meus-atendimentos')
+
+  return {
+    futuros: data?.futuros ?? [],
+    passados: data?.passados ?? [],
+  }
 }
 
 export async function getPacienteEvolucoes(): Promise<EvolucaoPaciente[]> {
@@ -259,16 +197,27 @@ export async function getPacienteEvolucoes(): Promise<EvolucaoPaciente[]> {
     return MOCK_EVOLUCOES
   }
 
-  const { data } = await pacienteApi.get('/mobile/paciente/minhas-evolucoes')
-  return toArray(data).map(mapEvolucao)
+  const { data } = await pacienteApi.get<EvolucaoPaciente[]>('/mobile/paciente/minhas-evolucoes')
+  return Array.isArray(data) ? data : []
 }
 
 export async function getPacienteEvolucaoDetalhe(
   evolucaoId: string | number,
 ): Promise<EvolucaoPacienteDetalhe> {
-  // backend endpoint not yet implemented — always uses mock
-  await new Promise((r) => setTimeout(r, 400))
-  return { ...MOCK_DETALHE, id: evolucaoId }
+  if (USE_MOCK) {
+    await new Promise((r) => setTimeout(r, 400))
+    return { ...MOCK_DETALHE, id: evolucaoId }
+  }
+
+  const pacienteId = usePacienteAuthStore.getState().pacienteId
+  if (!pacienteId) {
+    throw new Error('Sessão do paciente não encontrada')
+  }
+
+  const { data } = await pacienteApi.get<EvolucaoPacienteDetalhe>(
+    `/mobile/paciente/${pacienteId}/evolucoes/${evolucaoId}`,
+  )
+  return data
 }
 
 export async function getPacientePerfilContexto(
@@ -279,6 +228,8 @@ export async function getPacientePerfilContexto(
     return MOCK_PERFIL
   }
 
-  const { data } = await pacienteApi.get(`/mobile/paciente/${pacienteId}/perfil`)
+  const { data } = await pacienteApi.get<PerfilPacienteContexto>(
+    `/mobile/paciente/${pacienteId}/perfil`,
+  )
   return data
 }

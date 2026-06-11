@@ -40,15 +40,24 @@ export async function pacienteLoginRequest(
   return data;
 }
 
-/** Verifica se o e-mail existe no cadastro. Não cria usuário. */
-export async function pacienteVerificarEmail(email: string): Promise<PacienteAuthResponse> {
+export interface SolicitarCodigoResponse {
+  sucesso: boolean;
+  mensagem: string;
+}
+
+/**
+ * Etapa 1 do primeiro acesso: envia um código OTP para o e-mail cadastrado.
+ * Por segurança o backend sempre responde de forma genérica (não revela se o
+ * e-mail existe). Não cria usuário.
+ */
+export async function pacienteSolicitarCodigo(email: string): Promise<SolicitarCodigoResponse> {
   if (USE_MOCK) {
     await new Promise((r) => setTimeout(r, 500));
-    return { ...MOCK_LOGIN, token: '', primeiro_acesso: true };
+    return { sucesso: true, mensagem: 'Se o email estiver cadastrado, você receberá um código.' };
   }
 
-  const { data } = await api.post<PacienteAuthResponse>(
-    '/mobile/paciente/auth/primeiro-acesso',
+  const { data } = await api.post<SolicitarCodigoResponse>(
+    '/mobile/paciente/auth/solicitar-codigo',
     { email },
     { headers: AUTH_HEADERS },
   );
@@ -56,9 +65,13 @@ export async function pacienteVerificarEmail(email: string): Promise<PacienteAut
   return data;
 }
 
-/** Cria a senha e retorna JWT pronto para uso. */
-export async function pacienteDefinirSenha(
+/**
+ * Etapa 2 do primeiro acesso: valida o código OTP, cria a conta com a senha
+ * informada e retorna o JWT pronto para uso.
+ */
+export async function pacienteConfirmarCodigo(
   email: string,
+  codigo: string,
   senha: string,
 ): Promise<PacienteAuthResponse> {
   if (USE_MOCK) {
@@ -67,13 +80,13 @@ export async function pacienteDefinirSenha(
   }
 
   const { data } = await api.post<PacienteAuthResponse>(
-    '/mobile/paciente/auth/definir-senha',
-    { email, senha, confirmar_senha: senha },
+    '/mobile/paciente/auth/confirmar-codigo',
+    { email, codigo, password: senha },
     { headers: AUTH_HEADERS },
   );
 
   if (!data.token) {
-    throw new Error((data as any).mensagem ?? 'Não foi possível criar a senha');
+    throw new Error((data as any).mensagem ?? 'Código inválido ou expirado');
   }
 
   return data;

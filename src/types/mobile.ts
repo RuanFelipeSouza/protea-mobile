@@ -35,9 +35,6 @@ export type EvolucaoDetalhes = {
   evolucao: string
   paciente_id: number
   paciente_nome: string
-  document_id?: number
-  arquivo?: string | null
-  file_data?: string | null
   storage_url?: string | null
   assinatura?: AssinaturaCertificada | null
   pode_assinar?: boolean

@@ -4,7 +4,7 @@ import { proteaApi } from './apiClient';
 
 export const mobileService = {
   async getMinhasUnidades(signal?: AbortSignal): Promise<Unidade[]> {
-    const { data } = await proteaApi.get<Unidade[]>('mobile/unidades', { signal });
+    const { data } = await proteaApi.get<Unidade[]>('mobile/prestador/unidades', { signal });
     return data;
   },
 
@@ -14,7 +14,7 @@ export const mobileService = {
     signal?: AbortSignal,
   ): Promise<EvolucaoMobile[]> {
     const { data } = await proteaApi.get<EvolucaoMobile[]>(
-      `mobile/unidade/${unidadeId}/evolucoes/${pacienteId}`,
+      `mobile/prestador/unidade/${unidadeId}/paciente/${pacienteId}/evolucoes`,
       { signal },
     );
     return data;

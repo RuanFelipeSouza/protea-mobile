@@ -4,6 +4,7 @@ import { useRouter } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
 import { HeaderBar } from '../../organisms'
 import { useMinhasUnidades } from '../../../hooks/useMinhasUnidades'
+import { useUnidadeStore } from '../../../stores/unidadeStore'
 import { useTheme } from '../../../theme'
 import type { darkColors } from '../../../theme/dark'
 import type { colors as lightColors } from '../../../theme/colors'
@@ -16,11 +17,11 @@ export function MinhasUnidadesPage() {
   const { colors } = useTheme()
   const styles = useMemo(() => makeStyles(colors), [colors])
   const { unidades, loading, erro } = useMinhasUnidades()
+  const setSelecionada = useUnidadeStore((s) => s.setSelecionada)
 
   function handlePress(unidade: Unidade) {
-    router.push(
-      `/minhas-unidades/${unidade.id}?nome=${encodeURIComponent(unidade.unidade)}` as any,
-    )
+    setSelecionada(unidade)
+    router.replace('/' as never)
   }
 
   return (

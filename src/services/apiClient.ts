@@ -72,5 +72,5 @@ export const proteaApi = createApiInstance(
  * Host headers para rotear para o urlconf correto no backend em dev.
  * O backend usa o Host para direcionar entre protea.urls e publico.urls.
  */
-export const HOST_PROTEA = { Host: 'localhost' }
-export const HOST_PUBLICO = { Host: '10.0.2.2' }
+export const HOST_PROTEA = { Host: process.env.EXPO_PUBLIC_PROTEA_HOST ?? 'localhost' }
+export const HOST_PUBLICO = { Host: process.env.EXPO_PUBLIC_PUBLICO_HOST ?? '10.0.2.2' }

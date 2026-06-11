@@ -12,6 +12,7 @@
       "supportsTablet": true
     },
     "android": {
+      "package": "br.com.protea.mobile",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -45,6 +46,13 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "76d80b92-a878-4d52-b5d0-1afbfd60d632"
+      }
+    },
+    "owner": "ruansouza"
   }
 }

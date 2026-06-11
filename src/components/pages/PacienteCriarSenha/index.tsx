@@ -16,7 +16,7 @@ import { Ionicons } from '@expo/vector-icons'
 import { InputField } from '../../molecules/InputField'
 import { Icon } from '../../atoms'
 import { usePacienteTheme } from '../../../theme'
-import { pacienteDefinirSenha } from '../../../services/pacienteLoginService'
+import { pacienteSolicitarCodigo, pacienteConfirmarCodigo } from '../../../services/pacienteLoginService'
 import { savePatientToken, savePacienteMeta, removePatientToken, removePacienteMeta } from '../../../services/pacienteAuthService'
 import { removeToken, removeUsuario } from '../../../services/authService'
 import { useAuthStore } from '../../../stores/authStore'
@@ -37,21 +37,44 @@ export function PacienteCriarSenhaPage() {
   const styles = useMemo(() => makeStyles(colors), [colors])
   const setPacienteAuth = usePacienteAuthStore((s) => s.setAuth)
 
+  const [step, setStep] = useState<'email' | 'codigo'>('email')
   const [email, setEmail] = useState('')
+  const [codigo, setCodigo] = useState('')
   const [senha, setSenha] = useState('')
   const [confirmar, setConfirmar] = useState('')
   const [showSenha, setShowSenha] = useState(false)
   const [showConfirmar, setShowConfirmar] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [enviando, setEnviando] = useState(false)
 
   const allRulesOk = RULES.every((r) => r.check(senha))
   const senhasIguais = senha === confirmar && senha.length > 0
+  const codigoOk = codigo.trim().length >= 4
 
-  async function handleCriar() {
-    if (!email.trim() || !allRulesOk || !senhasIguais) return
+  // Etapa 1 — envia o código OTP para o e-mail cadastrado.
+  async function handleEnviarCodigo() {
+    if (!email.trim()) return
+    setEnviando(true)
+    try {
+      await pacienteSolicitarCodigo(email.trim())
+      setStep('codigo')
+      Alert.alert(
+        'Código enviado',
+        'Se o e-mail estiver cadastrado, você receberá um código de verificação. Confira sua caixa de entrada.',
+      )
+    } catch (e: any) {
+      Alert.alert('Erro', e?.response?.data?.mensagem ?? e?.message ?? 'Não foi possível enviar o código')
+    } finally {
+      setEnviando(false)
+    }
+  }
+
+  // Etapa 2 — valida o código, cria a senha e entra.
+  async function handleConfirmar() {
+    if (!email.trim() || !codigoOk || !allRulesOk || !senhasIguais) return
     setLoading(true)
     try {
-      const result = await pacienteDefinirSenha(email.trim(), senha)
+      const result = await pacienteConfirmarCodigo(email.trim(), codigo.trim(), senha)
       await savePatientToken(result.token)
       await savePacienteMeta(result.paciente_id, result.nome)
       setPacienteAuth(result.token, result.paciente_id, result.nome)
@@ -102,7 +125,9 @@ export function PacienteCriarSenhaPage() {
         {/* título */}
         <Text style={[styles.title, { color: colors.text }]}>Primeiro acesso</Text>
         <Text style={[styles.subtitle, { color: colors.textMuted }]}>
-          Informe o e-mail cadastrado na clínica e defina uma senha para acessar a Área do Paciente.
+          {step === 'email'
+            ? 'Informe o e-mail cadastrado na clínica. Enviaremos um código de verificação para confirmar que é você.'
+            : 'Digite o código que enviamos para o seu e-mail e defina uma senha para acessar a Área do Paciente.'}
         </Text>
 
         {/* campos */}
@@ -117,113 +142,165 @@ export function PacienteCriarSenhaPage() {
               keyboardType="email-address"
               autoCapitalize="none"
               autoCorrect={false}
+              editable={step === 'email'}
             />
           </View>
 
-          <View style={styles.inputGroup}>
-            <Text style={[styles.label, { color: colors.text }]}>Nova senha</Text>
-            <InputField
-              iconName="lock-closed-outline"
-              value={senha}
-              onChangeText={setSenha}
-              placeholder="••••••••"
-              secureTextEntry={!showSenha}
-              rightElement={
-                <Pressable onPress={() => setShowSenha((v) => !v)} hitSlop={8}>
-                  <Ionicons
-                    name={showSenha ? 'eye-off-outline' : 'eye-outline'}
-                    size={20}
-                    color={colors.textFaint}
-                  />
-                </Pressable>
-              }
-            />
-          </View>
+          {step === 'email' && (
+            <Pressable
+              onPress={handleEnviarCodigo}
+              disabled={enviando || !email.trim()}
+              style={[
+                styles.btn,
+                { backgroundColor: email.trim() ? colors.primary : colors.border },
+              ]}
+            >
+              {enviando ? (
+                <ActivityIndicator color={colors.primaryInk} />
+              ) : (
+                <Text
+                  style={[
+                    styles.btnLabel,
+                    { color: email.trim() ? colors.primaryInk : colors.textFaint },
+                  ]}
+                >
+                  Enviar código
+                </Text>
+              )}
+            </Pressable>
+          )}
 
-          <View style={styles.inputGroup}>
-            <Text style={[styles.label, { color: colors.text }]}>Confirmar senha</Text>
-            <InputField
-              iconName="lock-closed-outline"
-              value={confirmar}
-              onChangeText={setConfirmar}
-              placeholder="••••••••"
-              secureTextEntry={!showConfirmar}
-              rightElement={
-                <Pressable onPress={() => setShowConfirmar((v) => !v)} hitSlop={8}>
-                  <Ionicons
-                    name={showConfirmar ? 'eye-off-outline' : 'eye-outline'}
-                    size={20}
-                    color={colors.textFaint}
-                  />
-                </Pressable>
-              }
-            />
-          </View>
+          {step === 'codigo' && (
+            <>
+              <View style={styles.inputGroup}>
+                <Text style={[styles.label, { color: colors.text }]}>Código de verificação</Text>
+                <InputField
+                  iconName="key-outline"
+                  value={codigo}
+                  onChangeText={setCodigo}
+                  placeholder="000000"
+                  keyboardType="number-pad"
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                />
+              </View>
 
-          {/* checklist de regras */}
-          <View style={styles.rules}>
-            {RULES.map((r) => {
-              const ok = r.check(senha)
-              return (
-                <View key={r.label} style={styles.ruleRow}>
-                  <View
-                    style={[
-                      styles.ruleDot,
-                      {
-                        backgroundColor: ok ? colors.primary : 'transparent',
-                        borderColor: ok ? colors.primary : colors.border,
-                      },
-                    ]}
-                  >
-                    {ok && (
-                      <Ionicons name="checkmark" size={10} color={colors.primaryInk} />
-                    )}
-                  </View>
-                  <Text
-                    style={[
-                      styles.ruleText,
-                      { color: ok ? colors.primary : colors.textFaint },
-                    ]}
-                  >
-                    {r.label}
-                  </Text>
-                </View>
-              )
-            })}
-          </View>
+              <View style={styles.inputGroup}>
+                <Text style={[styles.label, { color: colors.text }]}>Nova senha</Text>
+                <InputField
+                  iconName="lock-closed-outline"
+                  value={senha}
+                  onChangeText={setSenha}
+                  placeholder="••••••••"
+                  secureTextEntry={!showSenha}
+                  rightElement={
+                    <Pressable onPress={() => setShowSenha((v) => !v)} hitSlop={8}>
+                      <Ionicons
+                        name={showSenha ? 'eye-off-outline' : 'eye-outline'}
+                        size={20}
+                        color={colors.textFaint}
+                      />
+                    </Pressable>
+                  }
+                />
+              </View>
 
-          {/* botão */}
-          <Pressable
-            onPress={handleCriar}
-            disabled={loading || !allRulesOk || !senhasIguais || !email.trim()}
-            style={[
-              styles.btn,
-              {
-                backgroundColor:
-                  allRulesOk && senhasIguais && email.trim()
-                    ? colors.primary
-                    : colors.border,
-              },
-            ]}
-          >
-            {loading ? (
-              <ActivityIndicator color={colors.primaryInk} />
-            ) : (
-              <Text
+              <View style={styles.inputGroup}>
+                <Text style={[styles.label, { color: colors.text }]}>Confirmar senha</Text>
+                <InputField
+                  iconName="lock-closed-outline"
+                  value={confirmar}
+                  onChangeText={setConfirmar}
+                  placeholder="••••••••"
+                  secureTextEntry={!showConfirmar}
+                  rightElement={
+                    <Pressable onPress={() => setShowConfirmar((v) => !v)} hitSlop={8}>
+                      <Ionicons
+                        name={showConfirmar ? 'eye-off-outline' : 'eye-outline'}
+                        size={20}
+                        color={colors.textFaint}
+                      />
+                    </Pressable>
+                  }
+                />
+              </View>
+
+              {/* checklist de regras */}
+              <View style={styles.rules}>
+                {RULES.map((r) => {
+                  const ok = r.check(senha)
+                  return (
+                    <View key={r.label} style={styles.ruleRow}>
+                      <View
+                        style={[
+                          styles.ruleDot,
+                          {
+                            backgroundColor: ok ? colors.primary : 'transparent',
+                            borderColor: ok ? colors.primary : colors.border,
+                          },
+                        ]}
+                      >
+                        {ok && (
+                          <Ionicons name="checkmark" size={10} color={colors.primaryInk} />
+                        )}
+                      </View>
+                      <Text
+                        style={[
+                          styles.ruleText,
+                          { color: ok ? colors.primary : colors.textFaint },
+                        ]}
+                      >
+                        {r.label}
+                      </Text>
+                    </View>
+                  )
+                })}
+              </View>
+
+              {/* botão */}
+              <Pressable
+                onPress={handleConfirmar}
+                disabled={loading || !codigoOk || !allRulesOk || !senhasIguais}
                 style={[
-                  styles.btnLabel,
+                  styles.btn,
                   {
-                    color:
-                      allRulesOk && senhasIguais && email.trim()
-                        ? colors.primaryInk
-                        : colors.textFaint,
+                    backgroundColor:
+                      codigoOk && allRulesOk && senhasIguais ? colors.primary : colors.border,
                   },
                 ]}
               >
-                Criar senha e entrar
-              </Text>
-            )}
-          </Pressable>
+                {loading ? (
+                  <ActivityIndicator color={colors.primaryInk} />
+                ) : (
+                  <Text
+                    style={[
+                      styles.btnLabel,
+                      {
+                        color:
+                          codigoOk && allRulesOk && senhasIguais
+                            ? colors.primaryInk
+                            : colors.textFaint,
+                      },
+                    ]}
+                  >
+                    Criar senha e entrar
+                  </Text>
+                )}
+              </Pressable>
+
+              {/* reenviar / trocar e-mail */}
+              <Pressable
+                onPress={handleEnviarCodigo}
+                disabled={enviando}
+                style={styles.resendRow}
+                hitSlop={8}
+              >
+                <Text style={[styles.resendText, { color: colors.primary }]}>
+                  {enviando ? 'Reenviando…' : 'Reenviar código'}
+                </Text>
+              </Pressable>
+            </>
+          )}
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -298,5 +375,7 @@ function makeStyles(colors: ReturnType<typeof usePacienteTheme>['colors']) {
       marginTop: 8,
     },
     btnLabel: { fontSize: 15, fontWeight: '700' },
+    resendRow: { alignItems: 'center', paddingVertical: 4, marginTop: 4 },
+    resendText: { fontSize: 14, fontWeight: '600' },
   })
 }

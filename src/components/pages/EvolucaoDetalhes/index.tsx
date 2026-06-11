@@ -4,6 +4,7 @@ import { useRouter } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
 import { useState, useEffect } from 'react'
 import { HeaderBar } from '../../organisms'
+import { HtmlContent } from '../../atoms'
 import { useEvolucaoDetalhes } from '../../../hooks/useEvolucaoDetalhes'
 import { useAssinaturaCertificada } from '../../../hooks/useAssinaturaCertificada'
 import { SenhaDialog } from '../../molecules/SenhaDialog'
@@ -64,7 +65,7 @@ export function EvolucaoDetalhesPage({ evolucaoId, onBack }: Props) {
 
   const handleConfirmarSenha = async (senha: string) => {
     if (evolucao) {
-      await assinar(senha, evolucao)
+      await assinar(senha, evolucao.id)
     }
   }
 
@@ -117,10 +118,10 @@ export function EvolucaoDetalhesPage({ evolucaoId, onBack }: Props) {
 
             <View style={styles.conteudoContainer}>
               <Text style={styles.conteudoLabel}>Conteúdo da Evolução</Text>
-              <Text style={styles.conteudo}>{evolucao.evolucao}</Text>
+              <HtmlContent html={evolucao.evolucao} />
             </View>
 
-            {evolucao.pode_assinar && !isAssinado(evolucao) && (
+            {evolucao.pode_assinar && certificadoHabilitado && !isAssinado(evolucao) && (
               <View style={styles.assinatureInfo}>
                 <Ionicons name="information-circle" size={16} color={colors.secondary[60]} />
                 <Text style={styles.assinatureInfoText}>
@@ -130,7 +131,7 @@ export function EvolucaoDetalhesPage({ evolucaoId, onBack }: Props) {
             )}
           </ScrollView>
 
-          {evolucao.pode_assinar && !isAssinado(evolucao) && (
+          {evolucao.pode_assinar && certificadoHabilitado && !isAssinado(evolucao) && (
             <View style={styles.footer}>
               <Pressable
                 style={[styles.assinarButton, assinandoLoading && styles.assinarButtonDisabled]}
@@ -238,11 +239,6 @@ function makeStyles(c: Colors) {
       fontWeight: '600',
       color: c.neutral[60],
       textTransform: 'uppercase',
-    },
-    conteudo: {
-      fontSize: 14,
-      lineHeight: 22,
-      color: c.neutral[80],
     },
     erroText: {
       fontSize: 14,

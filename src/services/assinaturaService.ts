@@ -1,37 +1,17 @@
-import type { AssinarDocumentoResponse, CertificadoAlias, CertificadoInfo, DadosAssinados } from '../types/assinatura';
+import type { AssinarResponse, CertificadoInfo } from '../types/assinatura';
 import { proteaApi } from './apiClient';
 
 export const assinaturaService = {
   async getCertificadoInfo(): Promise<CertificadoInfo> {
-    const { data } = await proteaApi.post<CertificadoInfo>('mobile/assinatura/cpfCertificado');
+    const { data } = await proteaApi.get<CertificadoInfo>('mobile/prestador/assinatura/cpf-certificado');
     return data;
   },
 
-  async autenticarCertificado(senha: string, cpf: string): Promise<any> {
-    const { data } = await proteaApi.post('mobile/assinatura/autenticarCertificado', { senha, cpf });
-    return data;
-  },
-
-  async buscarCertificadoAlias(token: string): Promise<CertificadoAlias[]> {
-    const { data } = await proteaApi.post('mobile/assinatura/buscarCertificadoAlias', { token });
-    return data;
-  },
-
-  async assinarDocumento(
-    token: string,
-    certificado_alias: string,
-    fileBase64: string,
-  ): Promise<AssinarDocumentoResponse> {
-    const { data } = await proteaApi.post('mobile/assinatura/assinarDocumento', {
-      token,
-      certificado_alias,
-      file_data: fileBase64,
-    });
-    return data;
-  },
-
-  async salvarDadosAssinatura(dados: DadosAssinados): Promise<any> {
-    const { data } = await proteaApi.post('mobile/assinatura/salvarDadosAssinatura', dados);
+  async assinarEvolucao(senha: string, evolucaoId: number): Promise<AssinarResponse> {
+    const { data } = await proteaApi.post<AssinarResponse>(
+      'mobile/prestador/assinatura/assinar',
+      { senha, evolucao_id: evolucaoId },
+    );
     return data;
   },
 };
