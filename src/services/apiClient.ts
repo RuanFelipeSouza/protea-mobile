@@ -59,28 +59,29 @@ function createApiInstance(baseURL: string, extraHeaders: Record<string, string>
   return instance;
 }
 
-export const api = createApiInstance(process.env.EXPO_PUBLIC_API_URL ?? '');
+function hostFromUrl(url: string | undefined): string {
+  if (!url) return '';
+  const match = /^https?:\/\/([^/:]+)/.exec(url);
+  return match?.[1] ?? '';
+}
+
+const apiUrl = process.env.EXPO_PUBLIC_API_URL ?? '';
+const apiHost = hostFromUrl(apiUrl);
+
+export const api = createApiInstance(apiUrl);
 
 const agendaHost = process.env.EXPO_PUBLIC_AGENDA_HOST;
 export const agendaApi = createApiInstance(
-  process.env.EXPO_PUBLIC_AGENDA_URL ?? process.env.EXPO_PUBLIC_API_URL ?? '',
+  process.env.EXPO_PUBLIC_AGENDA_URL ?? apiUrl,
   agendaHost ? { Host: agendaHost } : {},
 );
 
-/**
- * proteaApi: aponta para protea.urls (PacienteController, prontuário, etc).
- * Usa EXPO_PUBLIC_PROTEA_HOST para rotear via middleware ProteaConfigMult.
- * Em dev: EXPO_PUBLIC_PROTEA_HOST=localhost → WEBPROTEA_URL=localhost no backend.
- */
-const proteaHost = process.env.EXPO_PUBLIC_PROTEA_HOST;
 export const proteaApi = createApiInstance(
-  process.env.EXPO_PUBLIC_API_URL ?? '',
-  { Host: proteaHost ?? 'localhost' },
+  apiUrl,
+  apiHost ? { Host: apiHost } : {},
 );
 
-/**
- * Host headers para rotear para o urlconf correto no backend em dev.
- * O backend usa o Host para direcionar entre protea.urls e publico.urls.
- */
-export const HOST_PROTEA = { Host: process.env.EXPO_PUBLIC_PROTEA_HOST ?? 'localhost' }
-export const HOST_PUBLICO = { Host: process.env.EXPO_PUBLIC_PUBLICO_HOST ?? '10.0.2.2' }
+export const HOST_PROTEA = apiHost ? { Host: apiHost } : {};
+export const HOST_PUBLICO = process.env.EXPO_PUBLIC_PUBLICO_HOST
+  ? { Host: process.env.EXPO_PUBLIC_PUBLICO_HOST }
+  : {};
