@@ -51,4 +51,10 @@ export const colors = {
     40: '#66BB6A',
     60: '#43A047',
   },
+  // Azul de status — usado pelo "Agendado" na agenda.
+  info: {
+    10: '#E3F2FD',
+    40: '#42A5F5',
+    60: '#1E88E5',
+  },
 } as const;

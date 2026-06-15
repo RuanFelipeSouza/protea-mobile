@@ -21,9 +21,18 @@ export const evolucaoService = {
     }
   },
 
-  async getEvolucoes(pacienteId: string | number): Promise<EvolucaoRealizada[]> {
-    const { data } = await proteaApi.post<EvolucaoRealizada[]>(
-      `paciente/prontuario/allEvolucoesRealizadas?pacienteid=${pacienteId}`,
+  async getEvolucoes(
+    pacienteId: string | number,
+    unidadeId?: number,
+    signal?: AbortSignal,
+  ): Promise<EvolucaoRealizada[]> {
+    // Somente as evoluções feitas pelo profissional logado (regra "minhas evoluções").
+    const { data } = await proteaApi.get<EvolucaoRealizada[]>(
+      `mobile/prestador/paciente/${pacienteId}/evolucoes`,
+      {
+        params: unidadeId != null ? { unidade_id: unidadeId } : {},
+        signal,
+      },
     )
     return data
   },

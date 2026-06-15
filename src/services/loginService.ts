@@ -10,6 +10,8 @@ export interface UserResponse {
   username: string
   first_name: string
   last_name: string
+  password_reset: string | null
+  prestador_id: number | null
   permissoes: string[] | null
 }
 
@@ -52,6 +54,8 @@ export async function loginRequest(usuario: string, senha: string): Promise<Logi
   if (!data.token) {
     throw new Error(data.mensagem ?? 'Usuário ou senha inválidos')
   }
+
+  console.log('[loginService] user recebido:', JSON.stringify(data.user, null, 2))
 
   return data as LoginApiResponse
 }

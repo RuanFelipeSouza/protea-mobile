@@ -20,4 +20,14 @@ export type AgendaItem = {
   substituicao: boolean | null
   id_agendamento_plano_cuidado: number | null
   planodecuidadofk_id: number | null
+  /**
+   * Id do PACIENTE vinculado ao agendamento.
+   *
+   * ⚠️ Hoje o endpoint `codedatas/listagendasFiltrado` NÃO devolve este campo —
+   * o `id` da raiz é o id do agendamento, não do paciente. Para o botão
+   * "Ver paciente" do AgendaDetailSheet conseguir abrir `/prontuario/[id]`,
+   * o backend precisa incluir o id do paciente neste payload (ex.: `pacienteId`
+   * ou `paciente_id`). Mapeie-o aqui no `agendaService` quando disponível.
+   */
+  pacienteId?: number | null
 }

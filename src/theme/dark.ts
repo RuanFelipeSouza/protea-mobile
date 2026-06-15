@@ -62,4 +62,10 @@ export const darkColors = {
     40: '#66BB6A',
     60: '#81C784',
   },
+  // Azul de status — usado pelo "Agendado" na agenda.
+  info: {
+    10: '#15293B', // soft bg            (light: #E3F2FD)
+    40: '#64B5F6', //                    (light: #42A5F5)
+    60: '#42A5F5', // azul (levantado)   (light: #1E88E5)
+  },
 } as const

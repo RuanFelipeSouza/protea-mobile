@@ -39,11 +39,11 @@ export function HeaderBar({
   const styles = useMemo(() => makeStyles(colors), [colors])
 
   const options = useMemo(
-    () => unidades.map((u) => ({ label: u.unidade, value: u.id })),
+    () => unidades.map((u) => ({ label: u.unidade.replace(/^protea\s+/i, ''), value: u.id })),
     [unidades],
   )
 
-  const unidadeLabel = selecionada?.unidade ?? 'Selecione a unidade'
+  const unidadeLabel = selecionada?.unidade.replace(/^protea\s+/i, '') ?? 'Selecione a unidade'
   const hasSelection = !!selecionada
 
   function handleChange(id: number) {

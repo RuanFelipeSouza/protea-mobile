@@ -30,6 +30,9 @@ export function LoginForm({
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
 
+  const isPaciente = mode === 'paciente'
+  const usuarioLabel = isPaciente ? 'E-mail' : 'Usuário'
+
   async function handleLogin() {
     if (!usuario.trim() || !senha.trim()) return
     setLoading(true)
@@ -43,13 +46,13 @@ export function LoginForm({
   return (
     <View style={styles.container}>
       <View style={styles.inputGroup}>
-        <Text style={styles.label}>E-mail</Text>
+        <Text style={styles.label}>{usuarioLabel}</Text>
         <InputField
-          iconName="mail-outline"
+          iconName={isPaciente ? 'mail-outline' : 'person-outline'}
           value={usuario}
           onChangeText={setUsuario}
           placeholder="•••••"
-          keyboardType="email-address"
+          keyboardType={isPaciente ? 'email-address' : 'default'}
           autoCapitalize="none"
           autoCorrect={false}
         />

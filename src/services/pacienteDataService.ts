@@ -16,7 +16,7 @@ function createPacienteApi() {
   const instance = axios.create({
     baseURL: process.env.EXPO_PUBLIC_API_URL ?? '',
     timeout: 25000,
-    headers: { Host: PROTEA_HOST ?? 'localhost' },
+    headers: PROTEA_HOST ? { Host: PROTEA_HOST } : {},
   })
 
   instance.interceptors.request.use(async (config) => {

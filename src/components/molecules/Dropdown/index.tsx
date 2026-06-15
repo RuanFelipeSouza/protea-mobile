@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { View, Text, Pressable, Modal, FlatList, ActivityIndicator } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Icon } from '../../atoms'
 import { useTheme } from '../../../theme'
 import { makeStyles } from './styles'
@@ -61,6 +62,7 @@ export function Dropdown<T extends string | number>({
 
   const { colors } = useTheme()
   const styles = useMemo(() => makeStyles(colors), [colors])
+  const insets = useSafeAreaInsets()
 
   // Use controlled state when `open` prop is provided; otherwise internal.
   const isControlled = controlledOpen !== undefined
@@ -123,6 +125,7 @@ export function Dropdown<T extends string | number>({
               <FlatList
                 data={options}
                 keyExtractor={(item) => String(item.value)}
+                contentContainerStyle={{ paddingBottom: insets.bottom }}
                 ItemSeparatorComponent={() => <View style={styles.separator} />}
                 renderItem={({ item }) => {
                   const isActive = item.value === value

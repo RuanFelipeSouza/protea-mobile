@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { agendaService } from '../services/agendaService';
 import { useUnidadeStore } from '../stores/unidadeStore';
+import { useAuthStore } from '../stores/authStore';
 import type { AgendaItem } from '../types/agenda';
 
 const USE_MOCK = process.env.EXPO_PUBLIC_USE_MOCK === 'true';
@@ -118,6 +119,7 @@ const MOCK_AGENDA: AgendaItem[] = [
 
 export function useAgenda(date: string) {
   const unidade = useUnidadeStore((s) => s.selecionada);
+  const usuario = useAuthStore((s) => s.usuario);
   const [agenda, setAgenda] = useState<AgendaItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
@@ -143,7 +145,7 @@ export function useAgenda(date: string) {
     }
 
     agendaService
-      .getAgenda({ unidade: unidade.id, data: date })
+      .getAgenda({ unidade: unidade.id, data: date, profissional: usuario?.prestador_id ?? undefined })
       .then((data) => {
         setAgenda(data);
         setErro(null);
@@ -153,7 +155,7 @@ export function useAgenda(date: string) {
         setErro('Erro ao carregar agenda');
       })
       .finally(() => setLoading(false));
-  }, [date, unidade?.id]);
+  }, [date, unidade?.id, usuario?.id]);
 
   return { agenda, loading, erro };
 }

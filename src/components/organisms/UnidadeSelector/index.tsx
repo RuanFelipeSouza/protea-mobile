@@ -34,7 +34,7 @@ export function UnidadeSelector({
   const setSelecionada = useUnidadeStore((s) => s.setSelecionada)
 
   const options = useMemo<DropdownOption<number>[]>(
-    () => unidades.map((u) => ({ label: u.unidade, value: u.id })),
+    () => unidades.map((u) => ({ label: u.unidade.replace(/^protea\s+/i, ''), value: u.id })),
     [unidades],
   )
 

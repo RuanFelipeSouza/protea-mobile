@@ -10,8 +10,9 @@ import {
 import { useRouter } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
 import { HeaderBar, UnidadeRequired } from '../../organisms'
-import { AgendaCard } from '../../molecules'
+import { AgendaCard, AgendaDetailSheet, CalendarDialog } from '../../molecules'
 import { useAgenda } from '../../../hooks/useAgenda'
+import { useUnidadeStore } from '../../../stores/unidadeStore'
 import { useTheme } from '../../../theme'
 import type { darkColors } from '../../../theme/dark'
 import type { colors as lightColors } from '../../../theme/colors'
@@ -90,6 +91,23 @@ export function AgendaPage() {
   const { colors } = useTheme()
   const styles = useMemo(() => makeStyles(colors), [colors])
 
+  const [selecionado, setSelecionado] = useState<AgendaItem | null>(null)
+  const unidade = useUnidadeStore((s) => s.selecionada)
+
+  // Controle do calendário (seleção direta de data).
+  const [calendarioAberto, setCalendarioAberto] = useState(false)
+
+  function handleVerPaciente(item: AgendaItem) {
+    setSelecionado(null)
+    if (item.pacienteId == null) {
+      console.warn('[Agenda] agendamento sem pacienteId — navegação ignorada', item.id)
+      return
+    }
+    router.push(
+      `/prontuario/${item.pacienteId}?nome=${encodeURIComponent(item.nome)}` as any,
+    )
+  }
+
   return (
     <View style={styles.container}>
       <HeaderBar title="Agenda" showBack onBack={() => router.back()} showProfile={false} />
@@ -99,7 +117,15 @@ export function AgendaPage() {
           <Pressable onPress={() => setCurrentDate((d) => addDays(d, -1))} hitSlop={12}>
             <Ionicons name="chevron-back" size={22} color={colors.primary[70]} />
           </Pressable>
-          <Text style={styles.dateLabel}>{formatDateDisplay(currentDate)}</Text>
+          <Pressable
+            style={styles.dateBtn}
+            onPress={() => setCalendarioAberto(true)}
+            hitSlop={8}
+          >
+            <Ionicons name="calendar-outline" size={18} color={colors.primary[70]} />
+            <Text style={styles.dateLabel}>{formatDateDisplay(currentDate)}</Text>
+            <Ionicons name="chevron-down" size={16} color={colors.neutral[70]} />
+          </Pressable>
           <Pressable onPress={() => setCurrentDate((d) => addDays(d, 1))} hitSlop={12}>
             <Ionicons name="chevron-forward" size={22} color={colors.primary[70]} />
           </Pressable>
@@ -131,10 +157,31 @@ export function AgendaPage() {
                 <Text style={styles.emptyText}>Nenhum agendamento nesta data</Text>
               </View>
             }
-            renderItem={({ item }) => <AgendaCard item={item} />}
+            renderItem={({ item }) => (
+              <AgendaCard item={item} onPress={() => setSelecionado(item)} />
+            )}
           />
         )}
       </UnidadeRequired>
+
+      <AgendaDetailSheet
+        item={selecionado}
+        visible={selecionado != null}
+        unidadeNome={unidade?.unidade}
+        onClose={() => setSelecionado(null)}
+        onVerPaciente={handleVerPaciente}
+      />
+
+      {/* Calendário para selecionar a data diretamente. */}
+      <CalendarDialog
+        visible={calendarioAberto}
+        value={currentDate}
+        onClose={() => setCalendarioAberto(false)}
+        onSelect={(d) => {
+          setCurrentDate(d)
+          setCalendarioAberto(false)
+        }}
+      />
     </View>
   )
 }
@@ -155,6 +202,14 @@ function makeStyles(c: Colors) {
       backgroundColor: c.neutral[0],
       borderBottomWidth: 1,
       borderBottomColor: c.neutral[20],
+    },
+    dateBtn: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 7,
+      paddingHorizontal: 8,
+      paddingVertical: 4,
+      borderRadius: 8,
     },
     dateLabel: {
       fontSize: 15,

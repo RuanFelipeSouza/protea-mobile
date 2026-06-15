@@ -13,7 +13,8 @@ function createApiInstance(baseURL: string, extraHeaders: Record<string, string>
     config.headers['proteakey'] = process.env.EXPO_PUBLIC_PROTEA_KEY ?? '';
 
     const { method, url, params, data } = config;
-    console.log(`[API] ► ${method?.toUpperCase()} ${url}`, {
+    const fullUrl = (config.baseURL ?? '') + (url ?? '');
+    console.log(`[API] ► ${method?.toUpperCase()} ${fullUrl}`, {
       params: params ?? null,
       data: data ?? null,
     });
@@ -25,6 +26,7 @@ function createApiInstance(baseURL: string, extraHeaders: Record<string, string>
     (response) => {
       const count = Array.isArray(response.data) ? `${response.data.length} itens` : 'objeto';
       console.log(`[API] ✓ ${response.status} ${response.config.url} — ${count}`);
+      console.log('[API] ◄ body:', JSON.stringify(response.data));
       return response;
     },
     async (error) => {
@@ -59,14 +61,8 @@ function createApiInstance(baseURL: string, extraHeaders: Record<string, string>
   return instance;
 }
 
-function hostFromUrl(url: string | undefined): string {
-  if (!url) return '';
-  const match = /^https?:\/\/([^/:]+)/.exec(url);
-  return match?.[1] ?? '';
-}
-
 const apiUrl = process.env.EXPO_PUBLIC_API_URL ?? '';
-const apiHost = hostFromUrl(apiUrl);
+const proteaHost = process.env.EXPO_PUBLIC_PROTEA_HOST;
 
 export const api = createApiInstance(apiUrl);
 
@@ -78,10 +74,10 @@ export const agendaApi = createApiInstance(
 
 export const proteaApi = createApiInstance(
   apiUrl,
-  apiHost ? { Host: apiHost } : {},
+  proteaHost ? { Host: proteaHost } : {},
 );
 
-export const HOST_PROTEA = apiHost ? { Host: apiHost } : {};
+export const HOST_PROTEA = proteaHost ? { Host: proteaHost } : {};
 export const HOST_PUBLICO = process.env.EXPO_PUBLIC_PUBLICO_HOST
   ? { Host: process.env.EXPO_PUBLIC_PUBLICO_HOST }
   : {};
