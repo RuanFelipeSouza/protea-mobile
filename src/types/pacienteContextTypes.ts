@@ -50,3 +50,18 @@ export interface PacienteAuthResponse {
   primeiro_acesso?: boolean
   mensagem?: string | null
 }
+
+export interface GardenPrograma {
+  nome: string
+  dominio: string
+  nivel_ajuda: string | null
+  percentual: number
+  tentativas: number[]
+}
+
+export interface GardenStatusPaciente {
+  percentual_geral: number
+  data_ultima_sessao: string
+  percentual_sessao_anterior: number | null
+  programas: GardenPrograma[]
+}

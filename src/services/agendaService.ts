@@ -15,7 +15,7 @@ function getColorByStatus(status: string): string {
   if (s.includes('cancelad')) return theme.colors.error[60]
   if (s.includes('atendido')) return theme.colors.success[60]
   if (s.includes('falta') || s.includes('pendente')) return theme.colors.warning[60]
-  return theme.colors.info[60] // Agendado (e demais) → azul
+  return theme.colors.info[60] 
 }
 
 export const agendaService = {
@@ -31,6 +31,7 @@ export const agendaService = {
         ...item,
         cor: getColorByStatus(item.status),
         pacienteId: item.idpaciente ?? null,
+        evolucaoId: item.evolucao_id ?? null,
       }))
       .sort((a, b) => a.hora.localeCompare(b.hora))
   },

@@ -1,7 +1,7 @@
 import { Stack, useRouter, useSegments } from 'expo-router';
 import * as ExpoSplash from 'expo-splash-screen';
 import { useEffect, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StatusBar, StyleSheet, View } from 'react-native';
 import { SplashScreen } from '../src/components/pages';
 import { api, HOST_PUBLICO } from '../src/services/apiClient';
 import { getToken, removeToken, getUsuario, removeUsuario } from '../src/services/authService';
@@ -70,6 +70,7 @@ export default function RootLayout() {
   const setAuth = useAuthStore((s) => s.setAuth);
   const pacienteToken = usePacienteAuthStore((s) => s.token);
   const setPacienteAuth = usePacienteAuthStore((s) => s.setAuth);
+  const isDark = useThemeStore((s) => s.dark);
   const [authReady, setAuthReady] = useState(false);
 
   // Bootstrap: valida tokens persistidos contra o backend antes de hidratar a sessão.
@@ -173,6 +174,7 @@ export default function RootLayout() {
 
   return (
     <View style={{ flex: 1 }}>
+      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
       <Stack screenOptions={{ headerShown: false }} />
       {!authReady && (
         <View style={StyleSheet.absoluteFillObject}>

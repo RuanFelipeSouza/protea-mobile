@@ -5,6 +5,7 @@ import type {
   AgendamentoPaciente,
   EvolucaoPaciente,
   EvolucaoPacienteDetalhe,
+  GardenStatusPaciente,
   PerfilPacienteContexto,
 } from '../types/pacienteContextTypes'
 
@@ -218,6 +219,15 @@ export async function getPacienteEvolucaoDetalhe(
     `/mobile/paciente/${pacienteId}/evolucoes/${evolucaoId}`,
   )
   return data
+}
+
+export async function getPacienteGarden(): Promise<GardenStatusPaciente | null> {
+  try {
+    const response = await pacienteApi.get<GardenStatusPaciente>('/mobile/paciente/meu-garden')
+    return response.data ?? null
+  } catch {
+    return null
+  }
 }
 
 export async function getPacientePerfilContexto(

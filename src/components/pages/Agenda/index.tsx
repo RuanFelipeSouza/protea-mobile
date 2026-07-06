@@ -108,6 +108,13 @@ export function AgendaPage() {
     )
   }
 
+  function handleFolhaAction(_item: AgendaItem, destino: 'criar' | 'editar' | 'ver', chaveEditor: number) {
+    setSelecionado(null)
+    if (destino === 'criar') router.push(`/folha-registro/criar/${chaveEditor}` as any)
+    else if (destino === 'editar') router.push(`/folha-registro/editar/${chaveEditor}` as any)
+    else router.push(`/folha-registro/${chaveEditor}` as any)
+  }
+
   return (
     <View style={styles.container}>
       <HeaderBar title="Agenda" showBack onBack={() => router.back()} showProfile={false} />
@@ -170,6 +177,7 @@ export function AgendaPage() {
         unidadeNome={unidade?.unidade}
         onClose={() => setSelecionado(null)}
         onVerPaciente={handleVerPaciente}
+        onFolhaAction={handleFolhaAction}
       />
 
       {/* Calendário para selecionar a data diretamente. */}

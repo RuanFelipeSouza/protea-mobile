@@ -1,5 +1,6 @@
 import type { EvolucaoMobile } from '../types/mobile';
 import type { Unidade } from '../types/unidade';
+import type { GardenStatusPaciente } from '../types/pacienteContextTypes';
 import { proteaApi } from './apiClient';
 
 export const mobileService = {
@@ -18,5 +19,20 @@ export const mobileService = {
       { signal },
     );
     return data;
+  },
+
+  async getProntuarioGarden(
+    pacienteId: string,
+    signal?: AbortSignal,
+  ): Promise<GardenStatusPaciente | null> {
+    try {
+      const { data } = await proteaApi.get<GardenStatusPaciente>(
+        `mobile/prestador/paciente/${pacienteId}/garden`,
+        { signal },
+      );
+      return data ?? null;
+    } catch {
+      return null;
+    }
   },
 };

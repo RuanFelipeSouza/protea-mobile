@@ -16,6 +16,8 @@ import { usePacienteTheme, type PacienteTheme } from '../../../theme'
 import { useThemeStore } from '../../../stores/themeStore'
 import { usePacienteAuthStore } from '../../../stores/pacienteAuthStore'
 import { usePacientePerfil } from '../../../hooks/usePacientePerfil'
+import { usePacienteGarden } from '../../../hooks/usePacienteGarden'
+import { GardenProfileBlock } from '../../molecules/GardenProfileBlock'
 import { removePatientToken, removePacienteMeta } from '../../../services/pacienteAuthService'
 import { removeToken, removeUsuario } from '../../../services/authService'
 import { useAuthStore } from '../../../stores/authStore'
@@ -214,6 +216,7 @@ export function PacientePerfilPage() {
   const toggleTheme = useThemeStore((s) => s.toggle)
 
   const { perfil, loading } = usePacientePerfil(pacienteId)
+  const { garden } = usePacienteGarden()
 
   const displayNome = perfil?.nomesocial ?? perfil?.nome ?? nome
   const ini = initials(displayNome)
@@ -280,6 +283,11 @@ export function PacientePerfilPage() {
               )}
             </View>
           </View>
+
+          {/* garden */}
+          {garden && (
+            <GardenProfileBlock data={garden} colors={colors} />
+          )}
 
           {/* dados pessoais */}
           <View style={styles.group}>

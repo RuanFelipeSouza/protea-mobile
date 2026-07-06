@@ -15,6 +15,8 @@ import { usePacienteTheme, type PacienteTheme } from '../../../theme'
 import { usePacienteAuthStore } from '../../../stores/pacienteAuthStore'
 import { usePacienteAgendamentos } from '../../../hooks/usePacienteAgendamentos'
 import { usePacienteEvolucoes } from '../../../hooks/usePacienteEvolucoes'
+import { usePacienteGarden } from '../../../hooks/usePacienteGarden'
+import { GardenWidget } from '../../molecules/GardenWidget'
 import type { AgendamentoPaciente, EvolucaoPaciente } from '../../../types/pacienteContextTypes'
 
 // ─── helpers ─────────────────────────────────────────────────────────────────
@@ -242,6 +244,7 @@ export function PacienteDashboardPage() {
 
   const { futuros, loading: loadAg } = usePacienteAgendamentos()
   const { evolucoes, loading: loadEv } = usePacienteEvolucoes()
+  const { garden } = usePacienteGarden()
 
   const proximoAg = futuros[0] ?? null
   const ultimaEvo = evolucoes[0] ?? null
@@ -306,6 +309,15 @@ export function PacienteDashboardPage() {
               onPress={() => router.push('/(paciente)/perfil' as never)}
             />
           </View>
+
+          {/* garden */}
+          {garden && (
+            <GardenWidget
+              data={garden}
+              colors={colors}
+              onPress={() => router.push('/(paciente)/perfil' as never)}
+            />
+          )}
 
           {/* última evolução */}
           {ultimaEvo && (

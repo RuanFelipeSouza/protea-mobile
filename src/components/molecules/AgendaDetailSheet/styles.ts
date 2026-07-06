@@ -168,8 +168,57 @@ export const makeStyles = (c: Colors) =>
       color: c.neutral[90],
       marginTop: 1,
     },
+    // Folha de registro
+    folhaSelo: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 10,
+      borderRadius: 12,
+      padding: 14,
+      marginTop: 12,
+    },
+    folhaSeloTitle: {
+      fontSize: 13,
+      fontWeight: '700',
+    },
+    folhaSeloSubtitle: {
+      fontSize: 12,
+      marginTop: 1,
+    },
+    folhaSeloAction: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 3,
+    },
+    folhaSeloActionText: {
+      fontSize: 12,
+      fontWeight: '700',
+    },
+    folhaAviso: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 10,
+      borderRadius: 12,
+      paddingHorizontal: 14,
+      paddingVertical: 11,
+      marginTop: 12,
+    },
+    folhaAvisoText: {
+      fontSize: 13,
+      fontWeight: '600',
+      flex: 1,
+    },
     // Footer
     footer: {
+      paddingHorizontal: 20,
+      paddingTop: 14,
+      paddingBottom: 20,
+      borderTopWidth: 1,
+      borderTopColor: c.neutral[20],
+    },
+    footerRow: {
+      flexDirection: 'row',
+      gap: 10,
       paddingHorizontal: 20,
       paddingTop: 14,
       paddingBottom: 20,
@@ -192,5 +241,37 @@ export const makeStyles = (c: Colors) =>
       fontSize: 15,
       fontWeight: '700',
       color: c.neutral[0],
+    },
+    ctaOutline: {
+      flex: 1,
+      height: 50,
+      borderRadius: 12,
+      borderWidth: 1.5,
+      borderColor: c.neutral[30],
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 7,
+    },
+    ctaOutlinePressed: {
+      backgroundColor: c.neutral[10],
+    },
+    ctaOutlineText: {
+      fontSize: 14,
+      fontWeight: '700',
+      color: c.neutral[80],
+    },
+    ctaFolha: {
+      flex: 1.2,
+      height: 50,
+      borderRadius: 12,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 7,
+    },
+    ctaFolhaText: {
+      fontSize: 14,
+      fontWeight: '700',
     },
   })

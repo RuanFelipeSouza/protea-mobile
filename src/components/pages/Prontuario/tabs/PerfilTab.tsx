@@ -2,8 +2,11 @@ import { useEffect, useMemo } from 'react'
 import { View, Text, ScrollView, StyleSheet, ActivityIndicator } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import { usePerfilPaciente } from '../../../../hooks/usePerfilPaciente'
-import { useTheme } from '../../../../theme'
+import { useProntuarioGarden } from '../../../../hooks/useProntuarioGarden'
+import { useTheme, usePacienteTheme, type PacienteTheme } from '../../../../theme'
+import { GardenProfileBlock } from '../../../molecules/GardenProfileBlock'
 import type { PerfilPaciente } from '../../../../types/perfilPaciente'
+import type { GardenStatusPaciente } from '../../../../types/pacienteContextTypes'
 import type { darkColors } from '../../../../theme/dark'
 import type { colors as lightColors } from '../../../../theme/colors'
 
@@ -100,7 +103,15 @@ function Block({ title, children, styles }: { title: string; children: React.Rea
 
 // ── Profile content ───────────────────────────────────────────
 
-function PerfilContent({ perfil, styles, colors }: { perfil: PerfilPaciente; styles: Styles; colors: Colors }) {
+function PerfilContent({
+  perfil, garden, gardenColors, styles, colors,
+}: {
+  perfil: PerfilPaciente
+  garden: GardenStatusPaciente | null
+  gardenColors: PacienteTheme
+  styles: Styles
+  colors: Colors
+}) {
   const nomeExibido = titleCase(perfil.nomesocial || perfil.nome)
   const sexoIcone = perfil.sexo === 'Masculino' ? 'male' : 'female'
 
@@ -124,6 +135,9 @@ function PerfilContent({ perfil, styles, colors }: { perfil: PerfilPaciente; sty
           )}
         </View>
       </View>
+
+      {/* Garden */}
+      {garden && <GardenProfileBlock data={garden} colors={gardenColors} />}
 
       {/* Dados pessoais */}
       <Block title="Dados pessoais" styles={styles}>
@@ -170,8 +184,10 @@ function PerfilContent({ perfil, styles, colors }: { perfil: PerfilPaciente; sty
 
 export function PerfilTab({ pacienteId }: PerfilTabProps) {
   const { colors } = useTheme()
+  const { colors: gardenColors } = usePacienteTheme()
   const styles = useMemo(() => makeStyles(colors), [colors])
   const { perfil, loading, erro, carregar } = usePerfilPaciente(pacienteId)
+  const { garden } = useProntuarioGarden(pacienteId)
 
   useEffect(() => {
     carregar()
@@ -196,7 +212,15 @@ export function PerfilTab({ pacienteId }: PerfilTabProps) {
 
   if (!perfil) return null
 
-  return <PerfilContent perfil={perfil} styles={styles} colors={colors} />
+  return (
+    <PerfilContent
+      perfil={perfil}
+      garden={garden}
+      gardenColors={gardenColors}
+      styles={styles}
+      colors={colors}
+    />
+  )
 }
 
 // ── Styles ────────────────────────────────────────────────────

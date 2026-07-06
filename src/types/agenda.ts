@@ -30,4 +30,13 @@ export type AgendaItem = {
    * ou `paciente_id`). Mapeie-o aqui no `agendaService` quando disponível.
    */
   pacienteId?: number | null
+  /**
+   * Id da evolução vinculada ao atendimento — chave que a folha de registro
+   * consome hoje (rotas `/folha-registro/**`).
+   *
+   * ⚠️ O endpoint `codedatas/listagendasFiltrado` ainda não devolve este
+   * campo — ver `folhaAgendamentoService.resolverFolhaDoAgendamento`.
+   * Enquanto não vier, a faixa de folha na Agenda fica oculta (`sem_plano`).
+   */
+  evolucaoId?: number | null
 }

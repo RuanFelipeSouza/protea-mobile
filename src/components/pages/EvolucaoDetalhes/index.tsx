@@ -1,73 +1,90 @@
-import { useMemo } from 'react'
-import { View, Text, ScrollView, ActivityIndicator, StyleSheet, Pressable, Alert } from 'react-native'
-import { useRouter } from 'expo-router'
-import { Ionicons } from '@expo/vector-icons'
-import { useState, useEffect } from 'react'
-import { HeaderBar } from '../../organisms'
-import { HtmlContent } from '../../atoms'
-import { useEvolucaoDetalhes } from '../../../hooks/useEvolucaoDetalhes'
-import { useAssinaturaCertificada } from '../../../hooks/useAssinaturaCertificada'
-import { SenhaDialog } from '../../molecules/SenhaDialog'
-import { isAssinado } from '../../../types/mobile'
-import { useTheme } from '../../../theme'
-import type { darkColors } from '../../../theme/dark'
-import type { colors as lightColors } from '../../../theme/colors'
+import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import { useEffect, useMemo, useState } from 'react';
+import {
+  ActivityIndicator,
+  Alert,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
+import { useAssinaturaCertificada } from '../../../hooks/useAssinaturaCertificada';
+import { useEvolucaoDetalhes } from '../../../hooks/useEvolucaoDetalhes';
+import { useFolhaRegistroDisponibilidade } from '../../../hooks/useFolhaRegistroDisponibilidade';
+import { useTheme } from '../../../theme';
+import type { colors as lightColors } from '../../../theme/colors';
+import type { darkColors } from '../../../theme/dark';
+import { isAssinado } from '../../../types/mobile';
+import { HtmlContent } from '../../atoms';
+import { SenhaDialog } from '../../molecules/SenhaDialog';
+import { HeaderBar } from '../../organisms';
 
-type Colors = typeof lightColors | typeof darkColors
+type Colors = typeof lightColors | typeof darkColors;
 
 type Props = {
-  evolucaoId: number
-  onBack?: () => void
-}
+  evolucaoId: number;
+  onBack?: () => void;
+};
 
 export function EvolucaoDetalhesPage({ evolucaoId, onBack }: Props) {
-  const router = useRouter()
-  const { colors } = useTheme()
-  const styles = useMemo(() => makeStyles(colors), [colors])
-  const { evolucao, loading, erro, recarregar } = useEvolucaoDetalhes(evolucaoId)
-  const { assinar, carregarCertificado, loading: assinandoLoading, erro: erroAssinatura, sucesso, certificadoHabilitado, resetar } = useAssinaturaCertificada()
-  const [senhaDialogVisivel, setSenhaDialogVisivel] = useState(false)
+  const router = useRouter();
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
+  const { evolucao, loading, erro, recarregar } = useEvolucaoDetalhes(evolucaoId);
+  const { temFolhas } = useFolhaRegistroDisponibilidade(evolucaoId);
+  const {
+    assinar,
+    carregarCertificado,
+    loading: assinandoLoading,
+    erro: erroAssinatura,
+    sucesso,
+    certificadoHabilitado,
+    resetar,
+  } = useAssinaturaCertificada();
+  const [senhaDialogVisivel, setSenhaDialogVisivel] = useState(false);
 
   useEffect(() => {
-    carregarCertificado()
-  }, [])
+    carregarCertificado();
+  }, []);
 
   useEffect(() => {
     if (sucesso) {
-      Alert.alert('Sucesso', 'Documento assinado com sucesso!')
-      resetar()
-      setSenhaDialogVisivel(false)
-      recarregar()
+      Alert.alert('Sucesso', 'Documento assinado com sucesso!');
+      resetar();
+      setSenhaDialogVisivel(false);
+      recarregar();
     }
-  }, [sucesso])
+  }, [sucesso]);
 
   useEffect(() => {
     if (erroAssinatura) {
-      Alert.alert('Erro', erroAssinatura)
+      Alert.alert('Erro', erroAssinatura);
     }
-  }, [erroAssinatura])
+  }, [erroAssinatura]);
 
   const handleBack = () => {
     if (onBack) {
-      onBack()
+      onBack();
     } else {
-      router.back()
+      router.back();
     }
-  }
+  };
 
   const handleAssinar = () => {
     if (!evolucao || !certificadoHabilitado) {
-      Alert.alert('Aviso', 'Certificado digital não está ativado')
-      return
+      Alert.alert('Aviso', 'Certificado digital não está ativado');
+      return;
     }
-    setSenhaDialogVisivel(true)
-  }
+    setSenhaDialogVisivel(true);
+  };
 
   const handleConfirmarSenha = async (senha: string) => {
     if (evolucao) {
-      await assinar(senha, evolucao.id)
+      await assinar(senha, evolucao.id);
     }
-  }
+  };
 
   return (
     <View style={styles.container}>
@@ -121,6 +138,31 @@ export function EvolucaoDetalhesPage({ evolucaoId, onBack }: Props) {
               <HtmlContent html={evolucao.evolucao} />
             </View>
 
+            {temFolhas && (
+              <Pressable
+                style={styles.folhaButton}
+                onPress={() => router.push(`/folha-registro/${evolucao.id}` as never)}
+              >
+                <Ionicons name="grid-outline" size={18} color={colors.primary[70]} />
+                <Text style={styles.folhaButtonText}>Visualizar folha de registro</Text>
+                <Ionicons
+                  name="chevron-forward"
+                  size={18}
+                  color={colors.primary[70]}
+                  style={{ marginLeft: 'auto' }}
+                />
+              </Pressable>
+            )}
+
+            {temFolhas && (
+              <View style={styles.folhaNota}>
+                <Ionicons name="alert-circle-outline" size={16} color={colors.warning[60]} />
+                <Text style={styles.folhaNotaText}>
+                  O preenchimento é feito pela Agenda, no card do atendimento.
+                </Text>
+              </View>
+            )}
+
             {evolucao.pode_assinar && certificadoHabilitado && !isAssinado(evolucao) && (
               <View style={styles.assinatureInfo}>
                 <Ionicons name="information-circle" size={16} color={colors.secondary[60]} />
@@ -159,7 +201,7 @@ export function EvolucaoDetalhesPage({ evolucaoId, onBack }: Props) {
         loading={assinandoLoading}
       />
     </View>
-  )
+  );
 }
 
 function makeStyles(c: Colors) {
@@ -260,6 +302,36 @@ function makeStyles(c: Colors) {
       fontWeight: '600',
       color: c.primary[70],
     },
+    folhaButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 10,
+      backgroundColor: c.neutral[0],
+      borderRadius: 10,
+      borderWidth: 1,
+      borderColor: c.primary[20],
+      paddingVertical: 14,
+      paddingHorizontal: 14,
+    },
+    folhaButtonText: {
+      fontSize: 14,
+      fontWeight: '600',
+      color: c.primary[70],
+    },
+    folhaNota: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      gap: 8,
+      backgroundColor: c.warning[10],
+      borderRadius: 10,
+      padding: 12,
+    },
+    folhaNotaText: {
+      fontSize: 12,
+      color: c.warning[60],
+      flex: 1,
+      lineHeight: 17,
+    },
     assinatureInfo: {
       flexDirection: 'row',
       alignItems: 'center',
@@ -297,5 +369,5 @@ function makeStyles(c: Colors) {
       fontWeight: '600',
       color: 'white',
     },
-  })
+  });
 }

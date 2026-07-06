@@ -11,7 +11,8 @@ import {
 } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import { useTheme } from '../../../theme'
-import { getStatusStyle } from '../AgendaCard'
+import { getStatusStyle, folhaMeta } from '../AgendaCard'
+import { useFolhaAgendamento } from '../../../hooks/useFolhaAgendamento'
 import type { AgendaItem } from '../../../types/agenda'
 import { makeStyles } from './styles'
 
@@ -43,6 +44,8 @@ type Props = {
   onClose: () => void
   /** Disparado pelo botão "Ver paciente". */
   onVerPaciente: (item: AgendaItem) => void
+  /** Disparado pela ação da folha de registro (preencher / editar / ver). */
+  onFolhaAction?: (item: AgendaItem, destino: 'criar' | 'editar' | 'ver', chaveEditor: number) => void
 }
 
 export function AgendaDetailSheet({
@@ -51,9 +54,12 @@ export function AgendaDetailSheet({
   unidadeNome = '—',
   onClose,
   onVerPaciente,
+  onFolhaAction,
 }: Props) {
   const { colors } = useTheme()
   const styles = useMemo(() => makeStyles(colors), [colors])
+  const { status: folhaStatus, chaveEditor } = useFolhaAgendamento(item)
+  const fm = folhaMeta(folhaStatus, colors)
 
   const translateY = useRef(new Animated.Value(SCREEN_H)).current
   const scrim = useRef(new Animated.Value(0)).current
@@ -157,19 +163,70 @@ export function AgendaDetailSheet({
             <DetailRow icon="person-outline" label="Profissional" value={item.profissional} styles={styles} colors={colors} />
             <DetailRow icon="location-outline" label="Sala" value={semSala ? 'Não informada' : item.sala} styles={styles} colors={colors} />
             <DetailRow icon="business-outline" label="Unidade" value={unidadeNome} styles={styles} colors={colors} last />
+
+            {/* folha de registro — selo (concluída) ou aviso (pendente/preenchida) */}
+            {!isBloqueio && fm && folhaStatus === 'concluida' && (
+              <Pressable
+                style={[styles.folhaSelo, { backgroundColor: fm.soft }]}
+                onPress={() => chaveEditor != null && onFolhaAction?.(item, 'ver', chaveEditor)}
+              >
+                <Ionicons name={fm.icon} size={20} color={fm.color} />
+                <View style={{ flex: 1 }}>
+                  <Text style={[styles.folhaSeloTitle, { color: fm.color }]}>Folha de registro concluída</Text>
+                  <Text style={[styles.folhaSeloSubtitle, { color: fm.color }]}>Assinada — somente leitura</Text>
+                </View>
+                <View style={styles.folhaSeloAction}>
+                  <Ionicons name="grid-outline" size={15} color={fm.color} />
+                  <Text style={[styles.folhaSeloActionText, { color: fm.color }]}>Ver</Text>
+                </View>
+              </Pressable>
+            )}
+            {!isBloqueio && fm && folhaStatus !== 'concluida' && (
+              <View style={[styles.folhaAviso, { backgroundColor: fm.soft }]}>
+                <Ionicons name={fm.icon} size={18} color={fm.color} />
+                <Text style={[styles.folhaAvisoText, { color: fm.color }]}>{fm.label}</Text>
+              </View>
+            )}
           </ScrollView>
 
-          {/* footer — único CTA: tela do paciente (perfil + evoluções) */}
+          {/* footer — "Ver paciente" + ação da folha (quando aplicável) */}
           {!isBloqueio && (
-            <View style={styles.footer}>
+            <View style={fm ? styles.footerRow : styles.footer}>
               <Pressable
-                style={({ pressed }) => [styles.cta, pressed && styles.ctaPressed]}
+                style={({ pressed }) => [
+                  fm ? styles.ctaOutline : styles.cta,
+                  pressed && (fm ? styles.ctaOutlinePressed : styles.ctaPressed),
+                ]}
                 onPress={() => onVerPaciente(item)}
               >
-                <Ionicons name="person-circle-outline" size={20} color={colors.neutral[0]} />
-                <Text style={styles.ctaText}>Ver paciente</Text>
-                <Ionicons name="chevron-forward" size={18} color={colors.neutral[0]} />
+                <Ionicons
+                  name="person-circle-outline"
+                  size={20}
+                  color={fm ? colors.neutral[80] : colors.neutral[0]}
+                />
+                <Text style={fm ? styles.ctaOutlineText : styles.ctaText}>Ver paciente</Text>
+                {!fm && <Ionicons name="chevron-forward" size={18} color={colors.neutral[0]} />}
               </Pressable>
+
+              {fm && folhaStatus !== 'concluida' && (
+                <Pressable
+                  style={[
+                    styles.ctaFolha,
+                    fm.ctaFill
+                      ? { backgroundColor: fm.color }
+                      : { backgroundColor: 'transparent', borderWidth: 1.5, borderColor: fm.color },
+                  ]}
+                  onPress={() => {
+                    if (chaveEditor == null) return
+                    onFolhaAction?.(item, fm.destino as 'criar' | 'editar', chaveEditor)
+                  }}
+                >
+                  <Ionicons name={fm.icon} size={18} color={fm.ctaFill ? colors.neutral[0] : fm.color} />
+                  <Text style={[styles.ctaFolhaText, { color: fm.ctaFill ? colors.neutral[0] : fm.color }]}>
+                    {folhaStatus === 'pendente' ? 'Preencher folha' : 'Editar folha'}
+                  </Text>
+                </Pressable>
+              )}
             </View>
           )}
         </Animated.View>
