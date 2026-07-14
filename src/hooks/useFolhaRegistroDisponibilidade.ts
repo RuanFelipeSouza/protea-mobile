@@ -1,35 +1,34 @@
 import { useEffect, useState } from 'react'
 import { folhaRegistroService } from '../services/folhaRegistroService'
 import { folhaRegistroEditorService } from '../services/folhaRegistroEditorService'
+import type { FolhaAgendamentoStatus } from '../services/folhaAgendamentoService'
 
 type State = {
-  /** Existe folha de registro já preenchida (folhas.length > 0). Controla "Visualizar". */
-  temFolhas: boolean
-  /** Evolução tem plano de cuidado (config respondeu 200, não 404). Controla "Preencher". */
-  podePreencher: boolean
+  status: FolhaAgendamentoStatus
   loading: boolean
 }
 
+const SEM_PLANO: State = { status: 'sem_plano', loading: false }
+
 /**
- * Sonda os dois endpoints de folha de registro para decidir quais botões mostrar
- * na tela de detalhes da evolução — sem precisar de novos campos no backend:
+ * Sonda os dois endpoints de folha de registro para decidir o estado da
+ * folha de uma evolução — mesma sondagem de `useFolhaAgendamento`
+ * (getFolhaRegistro + getConfig), sem depender de um `AgendaItem`
+ * (a evolução já É a chave do editor).
  *
- *  - getFolhaRegistro → `folhas` vazio ⇒ não há folha para visualizar.
- *  - getConfig        → `tem_plano_cuidado === false` ⇒ não dá para preencher
- *                       (o backend responde 200 com config vazia nesse caso).
+ *  - getConfig        → `tem_plano_cuidado === false` ⇒ 'sem_plano'
+ *  - getFolhaRegistro → `atendimento.assinado`        ⇒ 'concluida'
+ *                     → `folhas.length > 0`           ⇒ 'preenchida'
+ *                     → caso contrário                ⇒ 'pendente'
  */
 export function useFolhaRegistroDisponibilidade(evolucaoId: number) {
-  const [state, setState] = useState<State>({
-    temFolhas: false,
-    podePreencher: false,
-    loading: true,
-  })
+  const [state, setState] = useState<State>({ status: 'sem_plano', loading: true })
 
   useEffect(() => {
     let ativo = true
 
     if (!evolucaoId) {
-      setState({ temFolhas: false, podePreencher: false, loading: false })
+      setState(SEM_PLANO)
       return
     }
 
@@ -41,17 +40,21 @@ export function useFolhaRegistroDisponibilidade(evolucaoId: number) {
     ]).then(([folhaRes, configRes]) => {
       if (!ativo) return
 
-      const temFolhas =
-        folhaRes.status === 'fulfilled' &&
-        (folhaRes.value.folhas?.length ?? 0) > 0
+      const temPlano =
+        configRes.status === 'fulfilled' && configRes.value.tem_plano_cuidado !== false
+      const folhas = folhaRes.status === 'fulfilled' ? folhaRes.value.folhas ?? [] : []
+      const assinada =
+        folhaRes.status === 'fulfilled' && folhaRes.value.atendimento?.assinado === true
 
-      // 200 com tem_plano_cuidado !== false ⇒ pode preencher.
-      // Qualquer falha de rede também esconde o botão.
-      const podePreencher =
-        configRes.status === 'fulfilled' &&
-        configRes.value.tem_plano_cuidado !== false
+      const resolved: FolhaAgendamentoStatus = !temPlano
+        ? 'sem_plano'
+        : assinada
+          ? 'concluida'
+          : folhas.length > 0
+            ? 'preenchida'
+            : 'pendente'
 
-      setState({ temFolhas, podePreencher, loading: false })
+      setState({ status: resolved, loading: false })
     })
 
     return () => {

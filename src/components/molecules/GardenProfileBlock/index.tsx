@@ -1,5 +1,4 @@
-import { useState } from 'react'
-import { View, Text, Pressable, StyleSheet } from 'react-native'
+import { View, Text, StyleSheet } from 'react-native'
 import Svg, { Circle, Path, Text as SvgText } from 'react-native-svg'
 import type { PacienteTheme } from '../../../theme'
 import type { GardenStatusPaciente } from '../../../types/pacienteContextTypes'
@@ -45,86 +44,9 @@ function ProgressRing({ pct, color, soft, size = 64, fs = 16 }: {
   )
 }
 
-// ── barra segmentada de tentativas (dado real) ────────────────────────────────
-
-function SegBar({ tentativas, colors }: { tentativas: number[]; colors: PacienteTheme }) {
-  if (!tentativas.length) return null
-  return (
-    <View style={rowStyles.seg}>
-      {tentativas.map((t, i) => (
-        <View key={i} style={[rowStyles.segItem, {
-          backgroundColor: t === 1 ? colors.primary : t === 0.5 ? colors.warn : colors.border,
-        }]} />
-      ))}
-    </View>
-  )
-}
-
-// ── linha de programa expansível ──────────────────────────────────────────────
-
-function ProgramaRow({ programa, colors }: {
-  programa: GardenStatusPaciente['programas'][number]
-  colors: PacienteTheme
-}) {
-  const [open, setOpen] = useState(false)
-  const st = gardenColor(programa.percentual, colors)
-  const ct = (v: number) => programa.tentativas.filter((t) => t === v).length
-
-  return (
-    <Pressable
-      onPress={() => setOpen(!open)}
-      style={[rowStyles.item, { backgroundColor: colors.surface, borderColor: colors.border }]}
-    >
-      <View style={[rowStyles.acc, { backgroundColor: st.color }]} />
-      <View style={{ flex: 1, minWidth: 0 }}>
-        <Text style={[rowStyles.nome, { color: colors.text }]} numberOfLines={1}>{programa.nome}</Text>
-        <Text style={[rowStyles.dominio, { color: colors.textMuted }]} numberOfLines={1}>
-          {programa.dominio}{programa.nivel_ajuda ? ` · ${programa.nivel_ajuda}` : ''}
-        </Text>
-
-        <SegBar tentativas={programa.tentativas} colors={colors} />
-
-        {open && (
-          <View style={rowStyles.legend}>
-            {([
-              ['Independente', colors.primary, ct(1)],
-              ['Com ajuda',    colors.warn,    ct(0.5)],
-              ['Não realiz.',  colors.border,  ct(0)],
-            ] as [string, string, number][]).map(([lbl, bg, n]) => (
-              <View key={lbl} style={rowStyles.legendItem}>
-                <View style={[rowStyles.legendDot, { backgroundColor: bg }]} />
-                <Text style={[rowStyles.legendText, { color: colors.textMuted }]}>{n} {lbl}</Text>
-              </View>
-            ))}
-          </View>
-        )}
-      </View>
-      <Text style={[rowStyles.pct, { color: st.color }]}>{programa.percentual}%</Text>
-    </Pressable>
-  )
-}
-
-const rowStyles = StyleSheet.create({
-  item: {
-    flexDirection: 'row', alignItems: 'center', gap: 12,
-    padding: 11, paddingRight: 12,
-    borderRadius: 12, borderWidth: 1,
-  },
-  acc: { width: 4, alignSelf: 'stretch', borderRadius: 999 },
-  nome: { fontSize: 13, fontWeight: '700', lineHeight: 17 },
-  dominio: { fontSize: 11.5, marginTop: 2 },
-  seg: { flexDirection: 'row', gap: 2, marginTop: 7 },
-  segItem: { flex: 1, height: 6, borderRadius: 2 },
-  pct: { fontSize: 17, fontWeight: '800', flexShrink: 0 },
-  legend: { flexDirection: 'row', gap: 10, marginTop: 9, flexWrap: 'wrap' },
-  legendItem: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  legendDot: { width: 7, height: 7, borderRadius: 999 },
-  legendText: { fontSize: 10.5 },
-})
-
 // ── componente principal ──────────────────────────────────────────────────────
 
-export function GardenProfileBlock({ data, colors, label = 'PROGRESSO' }: {
+export function GardenProfileBlock({ data, colors, label = 'GARDEN' }: {
   data: GardenStatusPaciente
   colors: PacienteTheme
   label?: string
@@ -169,13 +91,6 @@ export function GardenProfileBlock({ data, colors, label = 'PROGRESSO' }: {
             </Text>
           </View>
         </View>
-
-        {/* Programas — cards com acento lateral e barra de tentativas */}
-        <View style={blockStyles.list}>
-          {data.programas.map((p, i) => (
-            <ProgramaRow key={i} programa={p} colors={colors} />
-          ))}
-        </View>
       </View>
     </View>
   )
@@ -193,5 +108,4 @@ const blockStyles = StyleSheet.create({
   trend: { fontSize: 11.5, fontWeight: '700' },
   meta: { fontSize: 13, marginTop: 7 },
   meta2: { fontSize: 12, marginTop: 2 },
-  list: { padding: 8, gap: 8 },
 })

@@ -311,7 +311,7 @@ export function PacienteDashboardPage() {
           </View>
 
           {/* garden */}
-          {garden && (
+          {garden && garden.programas.length > 0 && (
             <GardenWidget
               data={garden}
               colors={colors}

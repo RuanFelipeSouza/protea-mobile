@@ -45,9 +45,6 @@ Crie um arquivo `.env` na raiz com:
 # Backend principal (Django Ninja)
 EXPO_PUBLIC_API_URL=http://10.0.2.2:8000
 
-# Backend da agenda (pode apontar para o mesmo host)
-EXPO_PUBLIC_AGENDA_URL=http://agenda.backhealthweb.protea.intranet:8000
-
 # Header `Host` para o middleware multi-host do backend
 # (em dev local: localhost; em produção: webprotea.protea.intranet)
 EXPO_PUBLIC_PROTEA_HOST=localhost
@@ -192,7 +189,7 @@ O backend Protea usa o header `Host` para decidir entre `protea.urls` e `publico
 |---|---|---|
 | `api` | Endpoints públicos (login, unidades, agenda) | nenhum por padrão; use `HOST_PUBLICO` ou `HOST_PROTEA` por chamada |
 | `proteaApi` | `PacienteController`, prontuário, evoluções | `EXPO_PUBLIC_PROTEA_HOST` |
-| `agendaApi` | Endpoints da agenda | `EXPO_PUBLIC_AGENDA_URL` |
+| `agendaApi` | Endpoints da agenda | `EXPO_PUBLIC_PROTEA_HOST` |
 
 Todos os endpoints precisam do header `proteakey` (`EXPO_PUBLIC_PROTEA_KEY`). Cada instância adiciona automaticamente o `Authorization: Bearer <jwt>` lido do `SecureStore`.
 

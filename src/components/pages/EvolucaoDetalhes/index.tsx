@@ -18,6 +18,7 @@ import type { colors as lightColors } from '../../../theme/colors';
 import type { darkColors } from '../../../theme/dark';
 import { isAssinado } from '../../../types/mobile';
 import { HtmlContent } from '../../atoms';
+import { folhaMeta } from '../../molecules/AgendaCard';
 import { SenhaDialog } from '../../molecules/SenhaDialog';
 import { HeaderBar } from '../../organisms';
 
@@ -33,7 +34,8 @@ export function EvolucaoDetalhesPage({ evolucaoId, onBack }: Props) {
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const { evolucao, loading, erro, recarregar } = useEvolucaoDetalhes(evolucaoId);
-  const { temFolhas } = useFolhaRegistroDisponibilidade(evolucaoId);
+  const { status: folhaStatus } = useFolhaRegistroDisponibilidade(evolucaoId);
+  const fm = folhaMeta(folhaStatus, colors);
   const {
     assinar,
     carregarCertificado,
@@ -138,29 +140,21 @@ export function EvolucaoDetalhesPage({ evolucaoId, onBack }: Props) {
               <HtmlContent html={evolucao.evolucao} />
             </View>
 
-            {temFolhas && (
+            {fm && (
               <Pressable
-                style={styles.folhaButton}
-                onPress={() => router.push(`/folha-registro/${evolucao.id}` as never)}
+                style={[styles.folhaButton, { borderColor: `${fm.color}55` }]}
+                onPress={() => {
+                  if (fm.destino === 'criar') router.push(`/folha-registro/criar/${evolucao.id}` as never);
+                  else if (fm.destino === 'editar') router.push(`/folha-registro/editar/${evolucao.id}` as never);
+                  else router.push(`/folha-registro/${evolucao.id}` as never);
+                }}
               >
-                <Ionicons name="grid-outline" size={18} color={colors.primary[70]} />
-                <Text style={styles.folhaButtonText}>Visualizar folha de registro</Text>
-                <Ionicons
-                  name="chevron-forward"
-                  size={18}
-                  color={colors.primary[70]}
-                  style={{ marginLeft: 'auto' }}
-                />
-              </Pressable>
-            )}
-
-            {temFolhas && (
-              <View style={styles.folhaNota}>
-                <Ionicons name="alert-circle-outline" size={16} color={colors.warning[60]} />
-                <Text style={styles.folhaNotaText}>
-                  O preenchimento é feito pela Agenda, no card do atendimento.
+                <Ionicons name={fm.icon} size={18} color={fm.color} />
+                <Text style={[styles.folhaButtonText, { color: fm.color }]}>
+                  {fm.destino === 'ver' ? 'Visualizar folha de registro' : `${fm.cta} folha de registro`}
                 </Text>
-              </View>
+                <Ionicons name="chevron-forward" size={18} color={fm.color} style={{ marginLeft: 'auto' }} />
+              </Pressable>
             )}
 
             {evolucao.pode_assinar && certificadoHabilitado && !isAssinado(evolucao) && (
@@ -317,20 +311,6 @@ function makeStyles(c: Colors) {
       fontSize: 14,
       fontWeight: '600',
       color: c.primary[70],
-    },
-    folhaNota: {
-      flexDirection: 'row',
-      alignItems: 'flex-start',
-      gap: 8,
-      backgroundColor: c.warning[10],
-      borderRadius: 10,
-      padding: 12,
-    },
-    folhaNotaText: {
-      fontSize: 12,
-      color: c.warning[60],
-      flex: 1,
-      lineHeight: 17,
     },
     assinatureInfo: {
       flexDirection: 'row',

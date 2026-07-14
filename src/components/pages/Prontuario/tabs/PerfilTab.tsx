@@ -168,12 +168,23 @@ function PerfilContent({
       {/* Acompanhamento */}
       <Block title="Acompanhamento" styles={styles}>
         <View style={styles.row}>
-          <Cell label="Período ativo" value={toDisplay(perfil.periodo_ativo)} styles={styles} rightBorder />
-          <Cell label="Plano de cuidado" value={toDisplay(perfil.plano_cuidado_ativo)} styles={styles} />
+          <Cell label="Período ativo" value={toDisplay(perfil.periodo_ativo?.data_entrada)} styles={styles} rightBorder />
+          <Cell label="Plano de cuidado" value={toDisplay(perfil.plano_cuidado_ativo?.status)} styles={styles} />
         </View>
         <View style={styles.row}>
-          <Cell label="Última evolução" value={toDisplay(perfil.ultima_evolucao)} styles={styles} rightBorder topBorder />
-          <Cell label="Último agend." value={toDisplay(perfil.ultimo_agendamento)} styles={styles} topBorder />
+          <Cell
+            label="Última evolução"
+            value={perfil.ultima_evolucao ? `${perfil.ultima_evolucao.data}${perfil.ultima_evolucao.hora ? ` · ${perfil.ultima_evolucao.hora}` : ''}` : null}
+            styles={styles}
+            rightBorder
+            topBorder
+          />
+          <Cell
+            label="Último agend."
+            value={perfil.ultimo_agendamento ? `${perfil.ultimo_agendamento.data}${perfil.ultimo_agendamento.hora ? ` · ${perfil.ultimo_agendamento.hora}` : ''}` : null}
+            styles={styles}
+            topBorder
+          />
         </View>
       </Block>
     </ScrollView>

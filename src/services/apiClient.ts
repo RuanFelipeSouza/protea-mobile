@@ -66,11 +66,7 @@ const proteaHost = process.env.EXPO_PUBLIC_PROTEA_HOST;
 
 export const api = createApiInstance(apiUrl);
 
-const agendaHost = process.env.EXPO_PUBLIC_AGENDA_HOST;
-export const agendaApi = createApiInstance(
-  process.env.EXPO_PUBLIC_AGENDA_URL ?? apiUrl,
-  agendaHost ? { Host: agendaHost } : {},
-);
+export const agendaApi = createApiInstance(apiUrl, proteaHost ? { Host: proteaHost } : {});
 
 export const proteaApi = createApiInstance(
   apiUrl,
