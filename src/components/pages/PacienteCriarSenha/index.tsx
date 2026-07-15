@@ -14,7 +14,7 @@ import { useRouter } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Ionicons } from '@expo/vector-icons'
 import { InputField } from '../../molecules/InputField'
-import { Icon } from '../../atoms'
+import { Icon, ProteaMark } from '../../atoms'
 import { usePacienteTheme } from '../../../theme'
 import { pacienteSolicitarCodigo, pacienteConfirmarCodigo } from '../../../services/pacienteLoginService'
 import { savePatientToken, savePacienteMeta, removePatientToken, removePacienteMeta } from '../../../services/pacienteAuthService'
@@ -119,7 +119,7 @@ export function PacienteCriarSenhaPage() {
 
         {/* logo */}
         <View style={styles.logoSection}>
-          <Icon name="flower-outline" size={44} color={colors.primary} />
+          <ProteaMark size={44} />
         </View>
 
         {/* título */}

@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { View, Text, Pressable, KeyboardAvoidingView, ScrollView, Platform } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { Icon } from '../../atoms'
+import { Icon, ProteaMark } from '../../atoms'
 import { LoginForm } from '../../organisms/LoginForm'
 import { useTheme } from '../../../theme'
 import { makeStyles } from './styles'
@@ -66,7 +66,7 @@ export function LoginTemplate({
         )}
 
         <View style={styles.logoSection}>
-          <Icon name="flower-outline" size={64} color={colors.primary[70]} />
+          <ProteaMark size={64} />
           <Text style={styles.logoText}>PROTEA</Text>
         </View>
 

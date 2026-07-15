@@ -9,25 +9,17 @@ import type { FolhaAgendamentoStatus } from '../../../services/folhaAgendamentoS
 import { makeStyles } from './styles'
 
 /**
- * Cores canônicas de status (compartilhadas pela borda do card e pelo badge):
- *   Atendido = verde · Agendado = azul · Cancelado = vermelho · Falta/Pendente = laranja
+ * Cores canônicas de status (compartilhadas pela borda do card e pelo badge).
+ * Valores fixos definidos pelo time de design/produto — não seguem a escala do tema.
  */
-export function getStatusStyle(
-  status: string,
-  colors: {
-    success: Record<60, string>
-    warning: Record<10 | 60, string>
-    error: Record<10 | 60, string>
-    primary: Record<10 | 70, string>
-    info: Record<10 | 60, string>
-  },
-): { color: string; bg: string } {
+export function getStatusStyle(status: string): { color: string; bg: string } {
   const s = status.toLowerCase()
-  if (s.includes('atendido')) return { color: colors.success[60], bg: colors.primary[10] }
-  if (s.includes('cancel'))   return { color: colors.error[60],   bg: colors.error[10] }
-  if (s.includes('falta') || s.includes('pendente'))
-    return { color: colors.warning[60], bg: colors.warning[10] }
-  return { color: colors.info[60], bg: colors.info[10] } // Agendado (e demais) → azul
+  if (s.includes('atendido'))  return { color: '#25a66a', bg: '#eaf7f2' }
+  if (s.includes('faltou'))    return { color: '#c95b5b', bg: '#fbeeee' }
+  if (s.includes('cancel'))    return { color: '#69736e', bg: '#f0f2f1' }
+  if (s.includes('pendente'))  return { color: '#d98a31', bg: '#fdf3e7' }
+  if (s.includes('bloquead'))  return { color: '#8069a8', bg: '#f1edf7' }
+  return { color: '#2f80ed', bg: '#eaf3fd' } // Agendado (e demais)
 }
 
 type FolhaColors = ReturnType<typeof useTheme>['colors']
@@ -78,7 +70,7 @@ type Props = {
 export function AgendaCard({ item, onPress }: Props) {
   const { colors } = useTheme()
   const styles = useMemo(() => makeStyles(colors), [colors])
-  const statusStyle = getStatusStyle(item.status, colors as any)
+  const statusStyle = getStatusStyle(item.status)
   const router = useRouter()
   const { status: folhaStatus, chaveEditor } = useFolhaAgendamento(item)
   const [aberta, setAberta] = useState(true) // faixa é um accordion — padrão aberto

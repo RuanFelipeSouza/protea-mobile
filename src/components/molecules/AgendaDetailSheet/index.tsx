@@ -91,7 +91,7 @@ export function AgendaDetailSheet({
 
   if (!item) return null
 
-  const statusStyle = getStatusStyle(item.status, colors as any)
+  const statusStyle = getStatusStyle(item.status)
   const categoria = (item.categoria || '').trim()
   const especialidade = (item.especialidade || '').trim() || '—'
   const isBloqueio = categoria.toLowerCase() === 'bloqueado'
