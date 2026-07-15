@@ -53,7 +53,7 @@ function SummaryBar({ agenda }: { agenda: AgendaItem[] }) {
   const counts = {
     agendado: agenda.filter((a) => a.status.toLowerCase().includes('agendado')).length,
     atendido: agenda.filter((a) => a.status.toLowerCase().includes('atendido')).length,
-    falta:    agenda.filter((a) => a.status.toLowerCase().includes('falta')).length,
+    falta:    agenda.filter((a) => a.status.toLowerCase().includes('falt')).length,
     pendente: agenda.filter((a) => a.status.toLowerCase().includes('pendente')).length,
   }
 

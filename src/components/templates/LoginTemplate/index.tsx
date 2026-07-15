@@ -1,10 +1,12 @@
 import { useMemo } from 'react'
-import { View, Text, Pressable, KeyboardAvoidingView, ScrollView, Platform } from 'react-native'
+import { View, Text, Image, Pressable, KeyboardAvoidingView, ScrollView, Platform } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { Icon, ProteaMark } from '../../atoms'
+import { Icon } from '../../atoms'
 import { LoginForm } from '../../organisms/LoginForm'
 import { useTheme } from '../../../theme'
 import { makeStyles } from './styles'
+
+const LOGO = require('../../../../assets/images/protea-login-logo.png')
 
 type LoginMode = 'prof' | 'paciente'
 
@@ -66,8 +68,7 @@ export function LoginTemplate({
         )}
 
         <View style={styles.logoSection}>
-          <ProteaMark size={64} />
-          <Text style={styles.logoText}>PROTEA</Text>
+          <Image source={LOGO} style={styles.logoImage} resizeMode="contain" />
         </View>
 
         <LoginForm

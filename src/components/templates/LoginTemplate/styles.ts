@@ -34,11 +34,10 @@ export const makeStyles = (c: Colors) =>
       marginBottom: 48,
       gap: 8,
     },
-    logoText: {
-      color: c.primary[80],
-      fontSize: 28,
-      fontWeight: '700',
-      letterSpacing: 4,
+    logoImage: {
+      width: '100%',
+      maxWidth: 320,
+      height: 82,
     },
     chipRow: {
       alignItems: 'center',

@@ -14,7 +14,7 @@ function getColorByStatus(status: string): string {
   const s = status.toLowerCase()
   if (s.includes('cancelad')) return theme.colors.error[60]
   if (s.includes('atendido')) return theme.colors.success[60]
-  if (s.includes('falta') || s.includes('pendente')) return theme.colors.warning[60]
+  if (s.includes('falt') || s.includes('pendente')) return theme.colors.warning[60]
   return theme.colors.info[60] 
 }
 
