@@ -13,12 +13,12 @@ export type TaskState = 'PENDING' | 'STARTED' | 'SUCCESS' | 'FAILURE' | 'RETRY'
 
 export const relatorioService = {
   async iniciarRelatorio(payload: RelatorioPayload): Promise<string> {
-    const { data } = await api.post<{ task_id: string }>('paciente/iniciarExportProntuario', payload)
+    const { data } = await api.post<{ task_id: string }>('api/core/paciente/iniciarExportProntuario', payload)
     return data.task_id
   },
 
   async verificarStatus(taskId: string): Promise<{ ready: boolean; state: TaskState }> {
-    const response = await api.get<any>('paciente/buscarExportProntuario', {
+    const response = await api.get<any>('api/core/paciente/buscarExportProntuario', {
       params: { task_id: taskId },
       validateStatus: (s) => s < 500,
       responseType: 'arraybuffer',
@@ -40,7 +40,7 @@ export const relatorioService = {
   async downloadEAbrirPdf(taskId: string, pacienteNome: string): Promise<void> {
     const token = await getToken()
     const baseUrl = (process.env.EXPO_PUBLIC_API_URL ?? '').replace(/\/$/, '')
-    const url = `${baseUrl}/paciente/buscarExportProntuario?task_id=${encodeURIComponent(taskId)}`
+    const url = `${baseUrl}/api/core/paciente/buscarExportProntuario?task_id=${encodeURIComponent(taskId)}`
     const nome = pacienteNome.toLowerCase().replace(/\s+/g, '-')
     const localUri = (FileSystem.documentDirectory ?? '') + `prontuario-${nome}.pdf`
 

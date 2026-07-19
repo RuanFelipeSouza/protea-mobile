@@ -10,7 +10,7 @@ export const evolucaoService = {
   async getEvolucaoDetalhes(evolucaoId: number): Promise<EvolucaoDetalhes> {
     console.log('[evolucaoService] 🔄 getEvolucaoDetalhes chamado com ID:', evolucaoId)
     try {
-      const endpoint = `mobile/prestador/evolucao/${evolucaoId}`
+      const endpoint = `api/mobile/prestador/evolucao/${evolucaoId}`
       console.log('[evolucaoService] 📡 Requisição para:', endpoint)
       const { data } = await proteaApi.get<EvolucaoDetalhes>(endpoint)
       console.log('[evolucaoService] ✅ Resposta recebida:', data)
@@ -28,7 +28,7 @@ export const evolucaoService = {
   ): Promise<EvolucaoRealizada[]> {
     // Somente as evoluções feitas pelo profissional logado (regra "minhas evoluções").
     const { data } = await proteaApi.get<EvolucaoRealizada[]>(
-      `mobile/prestador/paciente/${pacienteId}/evolucoes`,
+      `api/mobile/prestador/paciente/${pacienteId}/evolucoes`,
       {
         params: unidadeId != null ? { unidade_id: unidadeId } : {},
         signal,
@@ -39,14 +39,14 @@ export const evolucaoService = {
 
   async getDocumentos(pacienteId: string | number): Promise<DocumentoEvolucao[]> {
     const { data } = await proteaApi.get<DocumentoEvolucao[]>(
-      `paciente/prontuario/allEvolucoesPaciente?pacienteid=${pacienteId}`,
+      `api/core/paciente/prontuario/allEvolucoesPaciente?pacienteid=${pacienteId}`,
     )
     return data
   },
 
   async getAcompanhamentos(pacienteId: string | number): Promise<Acompanhamento[]> {
     const { data } = await proteaApi.post<Acompanhamento[]>(
-      `paciente/prontuario/allAcompanhamento?paciente=${pacienteId}`,
+      `api/core/paciente/prontuario/allAcompanhamento?paciente=${pacienteId}`,
     )
     return data
   },
@@ -57,7 +57,7 @@ export const evolucaoService = {
       next?: string | null
       previous?: string | null
       results: EvolucaoAPI[]
-    }>(`mobile/prestador/unidade/${unidadeId}/evolucoes?page=${page}`)
+    }>(`api/mobile/prestador/unidade/${unidadeId}/evolucoes?page=${page}`)
 
     return data.results.map((item) => ({
       id: item.id,
@@ -74,7 +74,7 @@ export const evolucaoService = {
   },
 
   async getPerfilPaciente(pacienteId: string | number): Promise<PerfilPaciente> {
-    const { data } = await proteaApi.get<PerfilPaciente>(`mobile/prestador/paciente/${pacienteId}/perfil`)
+    const { data } = await proteaApi.get<PerfilPaciente>(`api/mobile/prestador/paciente/${pacienteId}/perfil`)
     return data
   },
 
@@ -84,7 +84,7 @@ export const evolucaoService = {
       next?: string | null
       previous?: string | null
       results: Pendencia[]
-    }>(`mobile/prestador/unidade/${unidadeId}/pendencias?page=${page}`)
+    }>(`api/mobile/prestador/unidade/${unidadeId}/pendencias?page=${page}`)
 
     return data.results
   },

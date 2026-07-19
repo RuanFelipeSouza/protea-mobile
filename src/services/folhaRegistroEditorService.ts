@@ -6,8 +6,8 @@
  * (novaFolha / montarDoRegistro / buildPayload / validar).
  *
  * ⚠️ Endpoints — ver BACKEND.md:
- *  - GET  mobile/prestador/evolucao/{id}/folha-registro/config?modo=criar|editar
- *  - POST mobile/prestador/evolucao/{id}/folha-registro   (mesmo payload do web,
+ *  - GET  api/mobile/prestador/evolucao/{id}/folha-registro/config?modo=criar|editar
+ *  - POST api/mobile/prestador/evolucao/{id}/folha-registro   (mesmo payload do web,
  *         SEM disparar geração de PDF / assinatura — isso é uma tela à parte)
  */
 import { proteaApi } from './apiClient';
@@ -29,7 +29,7 @@ export const folhaRegistroEditorService = {
     evolucaoId: number,
     modo: 'criar' | 'editar',
   ): Promise<FolhaRegistroConfig> {
-    const endpoint = `mobile/prestador/evolucao/${evolucaoId}/folha-registro/config`;
+    const endpoint = `api/mobile/prestador/evolucao/${evolucaoId}/folha-registro/config`;
     console.log(
       '[folhaRegistroEditorService] ► GET',
       endpoint,
@@ -58,7 +58,7 @@ export const folhaRegistroEditorService = {
 
   /** Grava os registros. NÃO gera PDF nem dispara assinatura (ver BACKEND.md). */
   async salvar(payload: SalvarFolhaRegistroPayload): Promise<void> {
-    const endpoint = `mobile/prestador/evolucao/${payload.evolucao_id}/folha-registro`;
+    const endpoint = `api/mobile/prestador/evolucao/${payload.evolucao_id}/folha-registro`;
     console.log(
       '[folhaRegistroEditorService] ► POST',
       endpoint,

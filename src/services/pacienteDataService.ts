@@ -184,7 +184,7 @@ export async function getPacienteAgendamentos(): Promise<{
   const { data } = await pacienteApi.get<{
     futuros: AgendamentoPaciente[]
     passados: AgendamentoPaciente[]
-  }>('/mobile/paciente/meus-atendimentos')
+  }>('/api/mobile/paciente/meus-atendimentos')
 
   return {
     futuros: data?.futuros ?? [],
@@ -198,7 +198,7 @@ export async function getPacienteEvolucoes(): Promise<EvolucaoPaciente[]> {
     return MOCK_EVOLUCOES
   }
 
-  const { data } = await pacienteApi.get<EvolucaoPaciente[]>('/mobile/paciente/minhas-evolucoes')
+  const { data } = await pacienteApi.get<EvolucaoPaciente[]>('/api/mobile/paciente/minhas-evolucoes')
   return Array.isArray(data) ? data : []
 }
 
@@ -216,14 +216,14 @@ export async function getPacienteEvolucaoDetalhe(
   }
 
   const { data } = await pacienteApi.get<EvolucaoPacienteDetalhe>(
-    `/mobile/paciente/${pacienteId}/evolucoes/${evolucaoId}`,
+    `/api/mobile/paciente/${pacienteId}/evolucoes/${evolucaoId}`,
   )
   return data
 }
 
 export async function getPacienteGarden(): Promise<GardenStatusPaciente | null> {
   try {
-    const response = await pacienteApi.get<GardenStatusPaciente>('/mobile/paciente/meu-garden')
+    const response = await pacienteApi.get<GardenStatusPaciente>('/api/mobile/paciente/meu-garden')
     return response.data ?? null
   } catch {
     return null
@@ -239,7 +239,7 @@ export async function getPacientePerfilContexto(
   }
 
   const { data } = await pacienteApi.get<PerfilPacienteContexto>(
-    `/mobile/paciente/${pacienteId}/perfil`,
+    `/api/mobile/paciente/${pacienteId}/perfil`,
   )
   return data
 }

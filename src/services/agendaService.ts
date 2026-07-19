@@ -22,7 +22,7 @@ export const agendaService = {
   async getAgenda(filtros: AgendaFiltros): Promise<AgendaItem[]> {
     console.log('[agendaService] GET codedatas/listagendasFiltrado — payload:', JSON.stringify(filtros))
 
-    const { data } = await api.get<AgendaItem[]>('codedatas/listagendasFiltrado', {
+    const { data } = await api.get<AgendaItem[]>('api/agenda/codedatas/listagendasFiltrado', {
       params: filtros,
     })
 

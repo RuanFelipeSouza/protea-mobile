@@ -1,9 +1,12 @@
 import { useMemo } from 'react'
-import { View, Text, ScrollView, StatusBar, StyleSheet } from 'react-native'
+import { View, Text, Image, ScrollView, StatusBar, StyleSheet } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import { useRouter } from 'expo-router'
 import { HeaderBar } from '../../organisms'
 import { useSemanticColors } from '../../../theme'
+
+const ICON_LIGHT = require('../../../../assets/images/protea-login-icon.jpeg')
+const ICON_DARK = require('../../../../assets/images/protea-login-icon-dark.png')
 
 const VERSION = '1.0.0'
 
@@ -32,7 +35,7 @@ export function SobrePage() {
         {/* Logo / identidade */}
         <View style={styles.heroCard}>
           <View style={styles.logoBox}>
-            <Ionicons name="leaf" size={36} color={colors.primary} />
+            <Image source={dark ? ICON_DARK : ICON_LIGHT} style={styles.logoImage} resizeMode="contain" />
           </View>
           <Text style={styles.appName}>Protea</Text>
           <Text style={styles.appSub}>Plataforma de Saúde</Text>
@@ -68,7 +71,7 @@ export function SobrePage() {
         </View>
 
         {/* Rodapé */}
-        <Text style={styles.footer}>© 2025 Protea Saúde — Todos os direitos reservados.</Text>
+        <Text style={styles.footer}>© 2025 Protea Neurodesenvolvimento — Todos os direitos reservados.</Text>
       </ScrollView>
     </View>
   )
@@ -87,14 +90,11 @@ const makeStyles = (c: ReturnType<typeof useSemanticColors>['colors']) =>
       gap: 6,
     },
     logoBox: {
-      width: 72,
-      height: 72,
-      borderRadius: 20,
-      backgroundColor: c.primarySoft,
       alignItems: 'center',
       justifyContent: 'center',
       marginBottom: 4,
     },
+    logoImage: { width: 168, height: 168 * (410 / 1600) },
     appName: { fontSize: 24, fontWeight: '800', color: c.text },
     appSub: { fontSize: 14, color: c.textMuted },
     versionBadge: {

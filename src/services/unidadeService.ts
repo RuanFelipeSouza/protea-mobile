@@ -23,7 +23,7 @@ export const unidadeService = {
       return MOCK_UNIDADES
     }
 
-    const { data } = await api.get<Unidade[]>('unidade/unidadesPrest', {
+    const { data } = await api.get<Unidade[]>('api/core/unidade/unidadesPrest', {
       params: { user: userId },
       headers: HOST_PUBLICO,
       signal,

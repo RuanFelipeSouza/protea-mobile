@@ -27,7 +27,7 @@ export const patientService = {
   /** Busca pacientes por texto livre (busca global, sem filtro de unidade). */
   async buscar(texto: string, signal?: AbortSignal): Promise<Patient[]> {
     const { data } = await api.post<PacienteResponse[]>(
-      `paciente/allPaciente?texto=${encodeURIComponent(texto)}`,
+      `api/core/paciente/allPaciente?texto=${encodeURIComponent(texto)}`,
       {},
       { signal },
     );
@@ -45,7 +45,7 @@ export const patientService = {
     is_active?: boolean,
     signal?: AbortSignal,
   ): Promise<Patient[]> {
-    const { data } = await proteaApi.get<PacienteResponse[]>(`mobile/prestador/unidade/${unidadeId}/pacientes`, {
+    const { data } = await proteaApi.get<PacienteResponse[]>(`api/mobile/prestador/unidade/${unidadeId}/pacientes`, {
       params: {
         ...(is_active !== undefined && { is_active }),
       },
@@ -59,7 +59,7 @@ export const patientService = {
    * Endpoint: POST paciente/togglePacienteStatus
    */
   async toggleStatus(id: number, is_active: boolean): Promise<void> {
-    await api.post('paciente/togglePacienteStatus', { id, is_active });
+    await api.post('api/core/paciente/togglePacienteStatus', { id, is_active });
   },
 
   /**
@@ -67,6 +67,6 @@ export const patientService = {
    * Endpoint: POST paciente/removerPaciente?data={id}
    */
   async remover(id: number): Promise<void> {
-    await api.post(`paciente/removerPaciente?data=${id}`, {});
+    await api.post(`api/core/paciente/removerPaciente?data=${id}`, {});
   },
 };

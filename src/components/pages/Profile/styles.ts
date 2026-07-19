@@ -29,6 +29,11 @@ export const makeStyles = (c: SemanticPalette) =>
       backgroundColor: c.iconBg,
       alignItems: 'center',
       justifyContent: 'center',
+      overflow: 'hidden',
+    },
+    avatarImage: {
+      width: 56,
+      height: 56,
     },
     avatarText: {
       fontSize: 22,

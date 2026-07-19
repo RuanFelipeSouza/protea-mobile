@@ -4,6 +4,12 @@ export type PacienteMobile = {
   datanascimento: string | null
 }
 
+export type PerfilProfissional = {
+  id: number
+  nome: string
+  foto_url: string | null
+}
+
 export type EvolucaoStatus = 'realizada' | 'pendente' | 'cancelada'
 
 export type EvolucaoMobile = {

@@ -40,7 +40,7 @@ export async function loginRequest(usuario: string, senha: string): Promise<Logi
   }
 
   const { data } = await api.post<LoginApiResponse & { mensagem?: string }>(
-    '/seguranca/login',
+    '/api/core/seguranca/login',
     { username: usuario, password: senha },
     {
       headers: {

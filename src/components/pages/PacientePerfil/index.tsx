@@ -9,6 +9,7 @@ import {
   StatusBar,
   StyleSheet,
 } from 'react-native'
+import { Image } from 'expo-image'
 import { useRouter } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Ionicons } from '@expo/vector-icons'
@@ -270,7 +271,16 @@ export function PacientePerfilPage() {
           {/* hero */}
           <View style={[styles.heroCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
             <View style={[styles.avatar, { backgroundColor: colors.iconBg }]}>
-              <Text style={[styles.avatarText, { color: colors.primaryStrong }]}>{ini}</Text>
+              {perfil?.foto_url ? (
+                <Image
+                  source={{ uri: perfil.foto_url }}
+                  style={styles.avatarImage}
+                  contentFit="cover"
+                  transition={150}
+                />
+              ) : (
+                <Text style={[styles.avatarText, { color: colors.primaryStrong }]}>{ini}</Text>
+              )}
             </View>
             <View style={{ flex: 1, minWidth: 0 }}>
               <Text style={[styles.heroName, { color: colors.text }]} numberOfLines={2}>
@@ -380,7 +390,8 @@ function makeStyles(colors: PacienteTheme) {
       gap: 14,
       borderWidth: 1,
     },
-    avatar: { width: 56, height: 56, borderRadius: 28, alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
+    avatar: { width: 56, height: 56, borderRadius: 28, alignItems: 'center', justifyContent: 'center', flexShrink: 0, overflow: 'hidden' },
+    avatarImage: { width: 56, height: 56 },
     avatarText: { fontSize: 20, fontWeight: '700' },
     heroName: { fontSize: 16.5, fontWeight: '700' },
     heroSub: { fontSize: 12.5, marginTop: 3 },

@@ -7,6 +7,7 @@ import {
   Alert,
   StatusBar,
 } from 'react-native'
+import { Image } from 'expo-image'
 import { useRouter } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
 import { HeaderBar } from '../../organisms'
@@ -16,6 +17,7 @@ import { useAuthStore } from '../../../stores/authStore'
 import { usePacienteAuthStore } from '../../../stores/pacienteAuthStore'
 import { useThemeStore } from '../../../stores/themeStore'
 import { useSemanticColors } from '../../../theme'
+import { usePerfilProfissional } from '../../../hooks/usePerfilProfissional'
 import { makeStyles } from './styles'
 
 export function ProfilePage() {
@@ -26,6 +28,7 @@ export function ProfilePage() {
   const usuario = useAuthStore((s) => s.usuario)
   const logout = useAuthStore((s) => s.logout)
   const toggleTheme = useThemeStore((s) => s.toggle)
+  const { perfil } = usePerfilProfissional(usuario?.id)
 
   const nome = useMemo(() => {
     if (usuario?.first_name) {
@@ -88,7 +91,16 @@ export function ProfilePage() {
         {/* ── Cabeçalho: avatar + dados do usuário ── */}
         <View style={styles.headCard}>
           <View style={styles.avatar}>
-            <Text style={styles.avatarText}>{iniciais}</Text>
+            {perfil?.foto_url ? (
+              <Image
+                source={{ uri: perfil.foto_url }}
+                style={styles.avatarImage}
+                contentFit="cover"
+                transition={150}
+              />
+            ) : (
+              <Text style={styles.avatarText}>{iniciais}</Text>
+            )}
           </View>
           <View style={{ flex: 1, minWidth: 0 }}>
             <Text style={styles.name} numberOfLines={1}>

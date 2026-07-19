@@ -28,7 +28,7 @@ export async function pacienteLoginRequest(
   }
 
   const { data } = await api.post<PacienteAuthResponse>(
-    '/mobile/paciente/auth/login',
+    '/api/mobile/paciente/auth/login',
     { email, password: senha },
     { headers: AUTH_HEADERS },
   );
@@ -57,7 +57,7 @@ export async function pacienteSolicitarCodigo(email: string): Promise<SolicitarC
   }
 
   const { data } = await api.post<SolicitarCodigoResponse>(
-    '/mobile/paciente/auth/solicitar-codigo',
+    '/api/mobile/paciente/auth/solicitar-codigo',
     { email },
     { headers: AUTH_HEADERS },
   );
@@ -80,7 +80,7 @@ export async function pacienteConfirmarCodigo(
   }
 
   const { data } = await api.post<PacienteAuthResponse>(
-    '/mobile/paciente/auth/confirmar-codigo',
+    '/api/mobile/paciente/auth/confirmar-codigo',
     { email, codigo, password: senha },
     { headers: AUTH_HEADERS },
   );

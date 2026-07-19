@@ -10,7 +10,7 @@ export const folhaRegistroService = {
   async getFolhaRegistro(evolucaoId: number): Promise<FolhaRegistroView> {
     console.log('[folhaRegistroService] 🔄 getFolhaRegistro chamado com ID:', evolucaoId);
     try {
-      const endpoint = `mobile/prestador/evolucao/${evolucaoId}/folha-registro`;
+      const endpoint = `api/mobile/prestador/evolucao/${evolucaoId}/folha-registro`;
       console.log('[folhaRegistroService] ► GET', endpoint);
       const { data } = await proteaApi.get<FolhaRegistroView>(endpoint);
       console.log(
