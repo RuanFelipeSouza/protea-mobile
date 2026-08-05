@@ -18,7 +18,17 @@ import { useThemeStore } from '../../../stores/themeStore'
 import { usePacienteAuthStore } from '../../../stores/pacienteAuthStore'
 import { usePacientePerfil } from '../../../hooks/usePacientePerfil'
 import { usePacienteGarden } from '../../../hooks/usePacienteGarden'
+import { useResumoAtendimentos } from '../../../hooks/useResumoAtendimentos'
 import { GardenProfileBlock } from '../../molecules/GardenProfileBlock'
+import {
+  ResumoAtendimentosCard,
+  ResumoAtendimentosSkeleton,
+  ResumoAtendimentosEmpty,
+} from '../../molecules/ResumoAtendimentosCard'
+import {
+  EspecialidadeAtendimentosCard,
+  EspecialidadeAtendimentosSkeleton,
+} from '../../molecules/EspecialidadeAtendimentosCard'
 import { removePatientToken, removePacienteMeta } from '../../../services/pacienteAuthService'
 import { removeToken, removeUsuario } from '../../../services/authService'
 import { useAuthStore } from '../../../stores/authStore'
@@ -218,6 +228,7 @@ export function PacientePerfilPage() {
 
   const { perfil, loading } = usePacientePerfil(pacienteId)
   const { garden } = usePacienteGarden()
+  const { resumo, loading: loadingResumo, erro: erroResumo } = useResumoAtendimentos(pacienteId)
 
   const displayNome = perfil?.nomesocial ?? perfil?.nome ?? nome
   const ini = initials(displayNome)
@@ -295,8 +306,49 @@ export function PacientePerfilPage() {
           </View>
 
           {/* garden */}
-          {garden && (
+          {garden && garden.programas.length > 0 && (
             <GardenProfileBlock data={garden} colors={colors} />
+          )}
+
+          {/* resumo dos atendimentos (Plano de Cuidado ativo) */}
+          {loadingResumo && (
+            <>
+              <ResumoAtendimentosSkeleton colors={colors} />
+              <EspecialidadeAtendimentosSkeleton colors={colors} />
+              <EspecialidadeAtendimentosSkeleton colors={colors} />
+            </>
+          )}
+
+          {!loadingResumo && resumo && (
+            <>
+              <ResumoAtendimentosCard geral={resumo.geral} colors={colors} />
+
+              {resumo.progressoTemporal?.percentualDecorrido != null && (
+                <Text style={[styles.progressoTemporal, { color: colors.textFaint }]}>
+                  Progresso temporal do plano: {resumo.progressoTemporal.percentualDecorrido}% do período decorrido
+                </Text>
+              )}
+
+              {resumo.porEspecialidade.length > 0 && (
+                <View style={styles.group}>
+                  <Text style={[styles.groupTitle, { color: colors.primaryStrong }]}>POR ESPECIALIDADE</Text>
+                  <View style={{ gap: 10 }}>
+                    {resumo.porEspecialidade.map((esp, i) => (
+                      <EspecialidadeAtendimentosCard
+                        key={esp.especialidadeId}
+                        esp={esp}
+                        colors={colors}
+                        defaultOpen={i === 0}
+                      />
+                    ))}
+                  </View>
+                </View>
+              )}
+            </>
+          )}
+
+          {!loadingResumo && !resumo && !erroResumo && (
+            <ResumoAtendimentosEmpty colors={colors} />
           )}
 
           {/* dados pessoais */}
@@ -404,5 +456,6 @@ function makeStyles(colors: PacienteTheme) {
     },
     groupCard: { borderRadius: 14, borderWidth: 1, overflow: 'hidden' },
     gridRow: { flexDirection: 'row' },
+    progressoTemporal: { fontSize: 11.5, paddingHorizontal: 4 },
   })
 }

@@ -50,7 +50,9 @@ export function LoginPage() {
     <LoginTemplate
       mode={mode}
       onLogin={handleLogin}
-      onForgotPassword={() => Alert.alert('Em breve', 'Recuperação de senha em breve.')}
+      onForgotPassword={() =>
+        router.push((mode === 'paciente' ? '/paciente-esqueci-senha' : '/esqueci-senha') as never)
+      }
       onModeChange={setMode}
       onPrimeiroAcesso={() => router.push('/paciente-criar-senha' as never)}
     />

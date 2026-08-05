@@ -4,13 +4,18 @@ import { useEffect, useState } from 'react';
 import { StatusBar, StyleSheet, View } from 'react-native';
 import { SplashScreen } from '../src/components/pages';
 import { api, HOST_PUBLICO } from '../src/services/apiClient';
-import { getToken, removeToken, getUsuario, removeUsuario } from '../src/services/authService';
-import { getPatientToken, removePatientToken, getPacienteMeta, removePacienteMeta } from '../src/services/pacienteAuthService';
+import { getToken, getUsuario, removeToken, removeUsuario } from '../src/services/authService';
+import {
+  getPacienteMeta,
+  getPatientToken,
+  removePacienteMeta,
+  removePatientToken,
+} from '../src/services/pacienteAuthService';
 import { pacienteApi } from '../src/services/pacienteDataService';
 import { useAuthStore } from '../src/stores/authStore';
 import { usePacienteAuthStore } from '../src/stores/pacienteAuthStore';
-import { useUnidadeStore } from '../src/stores/unidadeStore';
 import { useThemeStore } from '../src/stores/themeStore';
+import { useUnidadeStore } from '../src/stores/unidadeStore';
 
 ExpoSplash.preventAutoHideAsync().catch(() => {});
 
@@ -136,21 +141,18 @@ export default function RootLayout() {
     };
   }, [setAuth, setPacienteAuth]);
 
-  // Guard de navegação: roda assim que auth está hidratado E em qualquer mudança de auth ou rota.
-  // O <Stack> já está montado nesse ponto, então router.replace funciona sem race condition.
   useEffect(() => {
     if (!authReady) return;
 
     const root = segments[0] as string | undefined;
     const inLogin = root === 'login';
     const inCriarSenha = root === 'paciente-criar-senha';
+    const inEsqueciSenha = root === 'paciente-esqueci-senha' || root === 'esqueci-senha';
     const inPaciente = root === '(paciente)';
 
-    // Criar senha é rota livre
-    if (inCriarSenha) return;
+    if (inCriarSenha || inEsqueciSenha) return;
 
     if (token) {
-      // Profissional autenticado: NÃO pode estar em login nem em (paciente)
       if (inLogin || inPaciente) {
         router.replace('/(tabs)');
       }
@@ -158,7 +160,6 @@ export default function RootLayout() {
     }
 
     if (pacienteToken) {
-      // Paciente autenticado: só pode estar em (paciente)
       if (!inPaciente) {
         router.replace('/(paciente)' as never);
       }

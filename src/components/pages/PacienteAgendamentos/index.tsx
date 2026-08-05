@@ -13,6 +13,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Ionicons } from '@expo/vector-icons'
 import { usePacienteTheme, type PacienteTheme } from '../../../theme'
 import { usePacienteAgendamentos } from '../../../hooks/usePacienteAgendamentos'
+import { useFeedbackAtendimento } from '../../../hooks/useFeedbackAtendimento'
+import { AvaliacaoAtendimentoSheet } from '../../molecules/AvaliacaoAtendimentoSheet'
+import { SENTIMENTO_LABEL } from '../../../types/feedbackAtendimento'
 import type { AgendamentoPaciente, AgendamentoStatus } from '../../../types/pacienteContextTypes'
 
 // ─── helpers ─────────────────────────────────────────────────────────────────
@@ -99,52 +102,93 @@ const segStyles = StyleSheet.create({
 
 function AgendaCard({ ag, colors }: { ag: AgendamentoPaciente; colors: PacienteTheme }) {
   const info = statusInfo(ag.status, colors)
+  const agendaId = Number(ag.id)
+  const podeAvaliar = ag.status === 'realizado' && Number.isFinite(agendaId)
+  const { feedback, loading, podeEditar, enviando, enviar, editar } = useFeedbackAtendimento(
+    podeAvaliar ? agendaId : null,
+  )
+  const [sheetOpen, setSheetOpen] = useState(false)
+
   return (
     <View style={[cardStyles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-      {/* data */}
-      <View style={cardStyles.dateBlock}>
-        <Text style={[cardStyles.day, { color: colors.text }]}>{dayOf(ag.data)}</Text>
-        <Text style={[cardStyles.month, { color: colors.textMuted }]}>{monthAbbr(ag.data)}</Text>
-        <Text style={[cardStyles.weekday, { color: colors.textFaint }]}>{ag.diaSemana}</Text>
-      </View>
-      <View style={[cardStyles.divider, { backgroundColor: colors.border }]} />
-      {/* info */}
-      <View style={{ flex: 1, minWidth: 0 }}>
-        <View style={cardStyles.titleRow}>
-          <Text style={[cardStyles.modalidade, { color: colors.text }]} numberOfLines={1}>
-            {ag.modalidade}
-          </Text>
-          <View style={[cardStyles.badge, { backgroundColor: info.bg }]}>
-            <Text style={[cardStyles.badgeText, { color: info.color }]}>{info.text}</Text>
+      <View style={{ flexDirection: 'row', gap: 14 }}>
+        {/* data */}
+        <View style={cardStyles.dateBlock}>
+          <Text style={[cardStyles.day, { color: colors.text }]}>{dayOf(ag.data)}</Text>
+          <Text style={[cardStyles.month, { color: colors.textMuted }]}>{monthAbbr(ag.data)}</Text>
+          <Text style={[cardStyles.weekday, { color: colors.textFaint }]}>{ag.diaSemana}</Text>
+        </View>
+        <View style={[cardStyles.divider, { backgroundColor: colors.border }]} />
+        {/* info */}
+        <View style={{ flex: 1, minWidth: 0 }}>
+          <View style={cardStyles.titleRow}>
+            <Text style={[cardStyles.modalidade, { color: colors.text }]} numberOfLines={1}>
+              {ag.modalidade}
+            </Text>
+            <View style={[cardStyles.badge, { backgroundColor: info.bg }]}>
+              <Text style={[cardStyles.badgeText, { color: info.color }]}>{info.text}</Text>
+            </View>
           </View>
-        </View>
-        <View style={cardStyles.metaRow}>
-          <Ionicons name="time-outline" size={14} color={colors.textFaint} />
-          <Text style={[cardStyles.meta, { color: colors.textMuted }]}>{ag.hora}</Text>
-        </View>
-        <View style={cardStyles.metaRow}>
-          <Ionicons name="person-outline" size={14} color={colors.textFaint} />
-          <Text style={[cardStyles.meta, { color: colors.textMuted }]} numberOfLines={1}>
-            {ag.profissional}
-          </Text>
-        </View>
-        {ag.local && (
           <View style={cardStyles.metaRow}>
-            <Ionicons name="location-outline" size={14} color={colors.textFaint} />
+            <Ionicons name="time-outline" size={14} color={colors.textFaint} />
+            <Text style={[cardStyles.meta, { color: colors.textMuted }]}>{ag.hora}</Text>
+          </View>
+          <View style={cardStyles.metaRow}>
+            <Ionicons name="person-outline" size={14} color={colors.textFaint} />
             <Text style={[cardStyles.meta, { color: colors.textMuted }]} numberOfLines={1}>
-              {ag.local}
+              {ag.profissional}
             </Text>
           </View>
-        )}
+          {ag.local && (
+            <View style={cardStyles.metaRow}>
+              <Ionicons name="location-outline" size={14} color={colors.textFaint} />
+              <Text style={[cardStyles.meta, { color: colors.textMuted }]} numberOfLines={1}>
+                {ag.local}
+              </Text>
+            </View>
+          )}
+        </View>
       </View>
+
+      {podeAvaliar && !loading && !feedback && (
+        <View style={[cardStyles.rateCta, { borderTopColor: colors.border }]}>
+          <Text style={[cardStyles.rateCtaText, { color: colors.textFaint }]}>Como foi esse atendimento?</Text>
+          <Pressable
+            onPress={() => setSheetOpen(true)}
+            style={[cardStyles.rateBtn, { borderColor: colors.primary }]}
+          >
+            <Ionicons name="star-outline" size={13} color={colors.primaryStrong} />
+            <Text style={[cardStyles.rateBtnText, { color: colors.primaryStrong }]}>Avaliar</Text>
+          </Pressable>
+        </View>
+      )}
+
+      {podeAvaliar && feedback && (
+        <Pressable style={[cardStyles.doneChip, { borderTopColor: colors.border }]} onPress={() => setSheetOpen(true)}>
+          <Text style={[cardStyles.doneLabel, { color: colors.text }]} numberOfLines={1}>
+            Você avaliou: {SENTIMENTO_LABEL[feedback.nota]}
+          </Text>
+          <Ionicons name="chevron-forward" size={14} color={colors.textFaint} />
+        </Pressable>
+      )}
+
+      {podeAvaliar && (
+        <AvaliacaoAtendimentoSheet
+          visible={sheetOpen}
+          onClose={() => setSheetOpen(false)}
+          contexto={{ modalidade: ag.modalidade, data: ag.data, profissional: ag.profissional }}
+          feedback={feedback}
+          podeEditar={podeEditar}
+          enviando={enviando}
+          onSubmit={(nota, comentario) => (feedback ? editar(nota, comentario) : enviar(nota, comentario))}
+        />
+      )}
     </View>
   )
 }
 
 const cardStyles = StyleSheet.create({
   card: {
-    flexDirection: 'row',
-    gap: 14,
     borderWidth: 1,
     borderRadius: 14,
     padding: 14,
@@ -160,6 +204,36 @@ const cardStyles = StyleSheet.create({
   badgeText: { fontSize: 10.5, fontWeight: '700' },
   metaRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 4 },
   meta: { fontSize: 13, flex: 1 },
+  rateCta: {
+    marginTop: 11,
+    paddingTop: 11,
+    borderTopWidth: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 10,
+  },
+  rateCtaText: { fontSize: 12, flexShrink: 1 },
+  rateBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 13,
+    paddingVertical: 8,
+    borderRadius: 999,
+    borderWidth: 1.5,
+  },
+  rateBtnText: { fontSize: 12.5, fontWeight: '800' },
+  doneChip: {
+    marginTop: 11,
+    paddingTop: 11,
+    borderTopWidth: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 10,
+  },
+  doneLabel: { fontSize: 12.5, fontWeight: '700', flex: 1 },
 })
 
 // ─── main page ───────────────────────────────────────────────────────────────
